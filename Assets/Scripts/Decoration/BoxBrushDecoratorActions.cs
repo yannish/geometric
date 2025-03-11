@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
@@ -7,12 +9,20 @@ public static class BoxBrushDecoratorActions
 {
     public static void RealignDecoratorFaceInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
-        if (decorator.prefab == null)
+        if (face.positions.Count != face.instances.Count)
             return;
+        
+        // Debug.LogWarning($"realigning decorator instances, posCount {face.positions.Count}, {face.instances.Count} ");
         
         for (int i = 0; i < face.positions.Count; i++)
         {
             var instance = face.instances[i];
+            if (instance == null)
+            {
+                Debug.LogWarning("instance of decorator prefab was null!", decorator.gameObject);
+                return;
+            }
+
             instance.transform.SetLocalPositionAndRotation(face.positions[i], Quaternion.identity);
         }
     }
@@ -21,9 +31,18 @@ public static class BoxBrushDecoratorActions
     {
         Debug.LogWarning("Reinstantiating prefabs!");
 
-        foreach(var instance in face.instances) 
-            GameObject.DestroyImmediate(instance);
+        var allChildGameObjects = decorator.gameObject
+            .GetComponentsInChildren<Transform>(true)
+            .Where(t => t != decorator.transform);
+        
+        foreach(var instance in allChildGameObjects) 
+            GameObject.DestroyImmediate(instance.gameObject);
+        
+        // foreach(var instance in face.instances) 
+        //     GameObject.DestroyImmediate(instance);
 
+        face.instances.Clear();
+        
         if (decorator.prefab == null)
             return;
         
@@ -81,12 +100,43 @@ public static class BoxBrushDecoratorActions
         face.center = -face.normal * faceDistance;
 
         face.effectiveSpan = faceLength - 2f * face.padding;
-        
-        float clampedInstanceSize = Mathf.Max(0.1f, face.instanceSize);
 
+        decorator.calculatedPrefabSize = -1f;
+        
+        if (decorator.prefab != null)
+        {
+            bool useCollisionCheckInstead = false;
+            if (useCollisionCheckInstead)
+            {
+                var prefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab) as GameObject;
+                var calculatedBounds = new Bounds(prefabInstance.transform.position, Vector3.zero);
+                var colliders = prefabInstance.GetComponentsInChildren<Collider>();
+                foreach (var col in colliders)
+                {
+                    calculatedBounds.Encapsulate(col.bounds);
+                }
+                GameObject.DestroyImmediate(prefabInstance);
+                
+                decorator.calculatedPrefabSize = calculatedBounds.size.x;
+            }
+            else
+            {
+                var calculatedBounds = new Bounds(decorator.prefab.transform.position, Vector3.zero);
+                var meshRenderers = decorator.prefab.GetComponentsInChildren<MeshRenderer>();
+                foreach (var meshRenderer in meshRenderers)
+                {
+                    calculatedBounds.Encapsulate(meshRenderer.bounds);
+                }
+        
+                decorator.calculatedPrefabSize = calculatedBounds.size.x;
+            }
+        }
+
+        float clampedInstanceSize = Mathf.Max(0.1f, decorator.calculatedPrefabSize);
+        
         int maxInstancesBySize = Mathf.FloorToInt(face.effectiveSpan / clampedInstanceSize);
         
-        Debug.LogWarning($"maxInstancesBySize: {maxInstancesBySize}");
+        // Debug.LogWarning($"maxInstancesBySize: {maxInstancesBySize}");
         
         var effectiveNumInstances = !face.fill 
             ? Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) 
@@ -94,8 +144,8 @@ public static class BoxBrushDecoratorActions
         
         effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE);
         
-        if(effectiveNumInstances > 0)
-            Debug.LogWarning($"effectiveNumInstances: {effectiveNumInstances}");
+        // if(effectiveNumInstances > 0)
+        //     Debug.LogWarning($"effectiveNumInstances: {effectiveNumInstances}");
         
         var totalInnerPadding = face.effectiveSpan - effectiveNumInstances * clampedInstanceSize;
         var separationPadding = effectiveNumInstances <= 1 
@@ -120,14 +170,14 @@ public static class BoxBrushDecoratorActions
             face.positions.Add(startSpan);
             for (int i = 1; i < effectiveNumInstances; i++)
             {
-                var spanStep = i * (separationPadding + face.instanceSize);
+                var spanStep = i * (separationPadding + clampedInstanceSize);
                 face.positions.Add(startSpan + spanStep * face.bitangent);
             }
         }
 
         instanceCountChanged = prevInstanceCount != face.positions.Count;
         
-        Debug.LogWarning($"pos count: {face.positions.Count}");
+        // Debug.LogWarning($"pos count: {face.positions.Count}");
         
         return instanceCountChanged;
     }

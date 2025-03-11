@@ -11,7 +11,8 @@ public class BoxBrushDecoratorInspector : Editor
     private SerializedProperty faceStatesProp;
     private SerializedProperty dimsProp;
     private SerializedProperty debugProp;
-    private SerializedProperty prefabProp;    
+    private SerializedProperty prefabProp;
+    private SerializedProperty calculatedPrefabSizeProp;
     
     private BoxBrushDecorator decorator;
     private BoxColliderExtendedEditor boxColliderExtendedEditor;
@@ -28,6 +29,7 @@ public class BoxBrushDecoratorInspector : Editor
         dimsProp = serializedObject.FindProperty("dimensions");
         debugProp = serializedObject.FindProperty("debug");
         prefabProp = serializedObject.FindProperty("prefab");
+        calculatedPrefabSizeProp = serializedObject.FindProperty("calculatedPrefabSize");
         
         ActiveEditorTracker editorTracker = ActiveEditorTracker.sharedTracker;
         Editor[] editors = editorTracker.activeEditors;
@@ -41,6 +43,9 @@ public class BoxBrushDecoratorInspector : Editor
                 boxColliderExtendedEditor.OnBoxColliderChanged += HandleBoxColliderEdit;
             }
         }
+        
+        //... TODO: recalculate all on select?
+        // BoxBrushDecoratorActions.RecalculateDecoratorFace()
     }
 
     private void OnDisable()
@@ -67,6 +72,7 @@ public class BoxBrushDecoratorInspector : Editor
         EditorGUILayout.PropertyField(typeProp);
         EditorGUILayout.PropertyField(dimsProp);
         EditorGUILayout.PropertyField(prefabProp);
+        EditorGUILayout.PropertyField(calculatedPrefabSizeProp);
         
         DrawFaceContent();
 
@@ -78,7 +84,11 @@ public class BoxBrushDecoratorInspector : Editor
                 if (face.isMuted)
                     continue;
             
-                if (BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face))
+                if (
+                    BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face)
+                    || face.instances == null 
+                    || face.instances.Count != face.positions.Count
+                    )
                     BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
                 
                 BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);

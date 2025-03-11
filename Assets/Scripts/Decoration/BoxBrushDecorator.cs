@@ -70,6 +70,8 @@ public class BoxBrushDecoratorFace
 
     public float span;
     public float effectiveSpan;
+
+    // public float calculatedPropSize;
     
     public List<Vector3> positions;
     public List<GameObject> instances;
@@ -86,10 +88,13 @@ public struct BoxBrushDimensions
 
 [RequireComponent(typeof(BoxCollider))]
 public class BoxBrushDecorator : MonoBehaviour
+    , ISerializationCallbackReceiver
 {
     public BoxBrushDebug debug;
     
     public GameObject prefab;
+    
+    public float calculatedPrefabSize;
 
     public float tempPrefabSize = 1f;
     
@@ -146,6 +151,9 @@ public class BoxBrushDecorator : MonoBehaviour
         
         Handles.matrix = transform.localToWorldMatrix;
         Gizmos.matrix = transform.localToWorldMatrix;
+
+        var instanceDrawSize = prefab != null ? calculatedPrefabSize : tempPrefabSize;
+        instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
         
         for (int i = 0; i < faceStates.Length; i++)
         {
@@ -173,7 +181,7 @@ public class BoxBrushDecorator : MonoBehaviour
             {
                 foreach (var localPos in face.positions)
                 {
-                    Handles.DrawWireCube(localPos, Vector3.one * face.instanceSize);
+                    Handles.DrawWireCube(localPos, Vector3.one * instanceDrawSize);
                 }
             }
         }
@@ -192,5 +200,15 @@ public class BoxBrushDecorator : MonoBehaviour
     {
         if (!type.HasFlag(BoxBrushDecorationType.EDGE))
             return;
+    }
+
+    public void OnBeforeSerialize()
+    {
+        // Debug.LogWarning("on before serialized boxBrush!");
+    }
+
+    public void OnAfterDeserialize()
+    {
+        Debug.LogWarning("on after serialized boxBrush!");
     }
 }
