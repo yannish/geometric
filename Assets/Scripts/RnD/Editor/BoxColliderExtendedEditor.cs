@@ -33,6 +33,12 @@ public class BoxColliderExtendedEditor : Editor
         // if(_internalEditor != null)
         //     DestroyImmediate(_internalEditor);
     }
+
+    void OnDestroy()
+    {
+        // if(_internalEditor != null)
+        //     DestroyImmediate(_internalEditor);
+    }
     
     private void ChangeCheck()
     {

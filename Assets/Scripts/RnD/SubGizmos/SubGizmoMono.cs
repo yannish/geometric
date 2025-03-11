@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum SubGizmoDirection
 {
@@ -20,6 +21,13 @@ public enum SubGizmoCorner
     BACK_TOP_RIGHT = 10,
     BACK_BOTTOM_LEFT = 11,
     BACK_BOTTOM_RIGHT = 12,
+}
+
+public enum SubGizmoType
+{
+    FACE,
+    // EDGE,
+    CORNER
 }
 
 public static class SubGizmoDirections
@@ -53,6 +61,23 @@ public static class SubGizmoDirections
 public class SubGizmoMono : MonoBehaviour
 {
     [Serializable]
+    public class SubGizmoDataA
+    {
+        public float quickFloat;
+        public string quickString;
+    }
+
+    [Serializable]
+    public class SubGizmoDataB
+    {
+        public string quickString;
+        public int quickInt;
+    }
+    
+    public float quickFloat;
+    public SubGizmoType subGizmoType = SubGizmoType.FACE;
+    
+    [Serializable]
     public class QuickDataClass
     {
         public float shownFloat;
@@ -65,3 +90,5 @@ public class SubGizmoMono : MonoBehaviour
     
     public QuickDataClass[] quickDatas = new QuickDataClass[4];
 }
+
+// public void Draw

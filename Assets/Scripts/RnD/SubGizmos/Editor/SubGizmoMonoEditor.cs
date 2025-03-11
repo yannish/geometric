@@ -12,18 +12,24 @@ public class SubGizmoMonoEditor : Editor
     private int selectedHandle = -1;
 
     private SerializedProperty quickDatasProp;
+    private SerializedProperty typeProp;
 
     private void OnEnable()
     {
         quickDatasProp = serializedObject.FindProperty("quickDatas");
+        typeProp = serializedObject.FindProperty("subGizmoType");
     }
 
     public override void OnInspectorGUI()
     {
+        serializedObject.DrawScriptField();
+        
         var subGizmo = target as SubGizmoMono;
         
         serializedObject.Update();
+        
         EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(typeProp);
         EditorGUILayout.PropertyField(quickDatasProp);
         if (EditorGUI.EndChangeCheck())
         {
@@ -133,7 +139,26 @@ public class SubGizmoMonoEditor : Editor
         {
             var dir = kvp.Value;
 
-            var handlePos = subGizmo.transform.position + dir * subGizmo.size;
+            switch (subGizmo.subGizmoType)
+            {
+                case SubGizmoType.FACE:
+                    if (kvp.Key >= 5)
+                        continue;
+                    break;
+                
+                // case SubGizmoType.EDGE:
+                //     break;
+                
+                case SubGizmoType.CORNER:
+                    if (kvp.Key < 5)
+                        continue;
+                    break;
+            }
+            
+            // if(kvp.Key)
+
+            var handlePos = dir * subGizmo.size;
+            // var handlePos = subGizmo.transform.position + dir * subGizmo.size;
             int controlId = GUIUtility.GetControlID(FocusType.Passive);
 
             if (!handleLookup.ContainsKey(controlId))
@@ -142,12 +167,19 @@ public class SubGizmoMonoEditor : Editor
             float effectiveShowSize = subGizmo.grabSize;
             effectiveShowSize *= kvp.Key == selectedHandle ? 1.3f : 1f;
             
-            if (Handles.Button(
+            // var handleCap = Handles.SphereHandleCap()
+            
+            var rot = Quaternion.LookRotation(dir, Vector3.up);
+            
+            var prevHandlesMatrix = Handles.matrix;
+            Handles.matrix = subGizmo.transform.localToWorldMatrix;
+            if (
+                Handles.Button(
                     handlePos,
-                    Quaternion.identity,
+                    rot,
                     effectiveShowSize,
                     subGizmo.grabSize,
-                    Handles.SphereHandleCap
+                    Handles.RectangleHandleCap
                     ))
             {
                 // obj.selectedHandleIndex = i;
@@ -163,8 +195,11 @@ public class SubGizmoMonoEditor : Editor
                 selectedHandle = kvp.Key;
                 
                 SceneView.RepaintAll();
+                
                 Repaint();
             }
+
+            Handles.matrix = prevHandlesMatrix;
 
             // Handles.CubeHandleCap(controlId, handlePos, Quaternion.identity, subGizmo.grabSize, EventType.Repaint);
         }

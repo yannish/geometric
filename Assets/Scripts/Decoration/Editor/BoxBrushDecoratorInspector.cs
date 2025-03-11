@@ -16,7 +16,7 @@ public class BoxBrushDecoratorInspector : Editor
     
     private BoxBrushDecorator decorator;
     private BoxColliderExtendedEditor boxColliderExtendedEditor;
-    private bool objectDirtied = false;
+    // private bool objectDirtied = false;
 
     
     private void OnEnable()
@@ -38,9 +38,11 @@ public class BoxBrushDecoratorInspector : Editor
         {
             if (editor.target is BoxCollider)
             {
+                // TODO: .. destroy / shut this down as well...?
                 boxColliderExtendedEditor = editor as BoxColliderExtendedEditor;
                 boxColliderExtendedEditor.OnBoxColliderChanged -= HandleBoxColliderEdit;
                 boxColliderExtendedEditor.OnBoxColliderChanged += HandleBoxColliderEdit;
+                break;
             }
         }
         
@@ -59,9 +61,13 @@ public class BoxBrushDecoratorInspector : Editor
         
     }
 
+    private bool changedPrefabAsset;
+    
     public override void OnInspectorGUI()
     {
-        objectDirtied = false;
+        // objectDirtied = false;
+
+        changedPrefabAsset = false;
         
         serializedObject.DrawScriptField();
         serializedObject.Update();
@@ -82,9 +88,25 @@ public class BoxBrushDecoratorInspector : Editor
         EditorGUI.BeginChangeCheck();
         
         EditorGUILayout.PropertyField(debugProp);
-        EditorGUILayout.PropertyField(typeProp);
         EditorGUILayout.PropertyField(dimsProp);
+
+        var prevDecoratorType = decorator.type;
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(typeProp);
+        if (EditorGUI.EndChangeCheck())
+        {
+            
+        }
+        
+        EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(prefabProp);
+        if (EditorGUI.EndChangeCheck())
+        {
+            // serializedObject.ApplyModifiedProperties();
+            Debug.LogWarning("Changed prefab asset.");
+            changedPrefabAsset = true;
+        }
+        
         EditorGUILayout.PropertyField(calculatedPrefabSizeProp);
         
         DrawFaceContent();
@@ -92,30 +114,84 @@ public class BoxBrushDecoratorInspector : Editor
         if (EditorGUI.EndChangeCheck())
         {
             serializedObject.ApplyModifiedProperties();
-            foreach (var face in decorator.faceStates)
+
+            //... switched off Faces
+            if (
+                changedPrefabAsset
+                || (prevDecoratorType == BoxBrushDecorationType.FACE && decorator.type != BoxBrushDecorationType.FACE)
+                )
             {
-                if (face.isMuted)
+                Debug.LogWarning("CLEARING FACES");
+                
+                foreach (var face in decorator.faceStates)
                 {
                     BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
                     BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
-                    continue;
                 }
+            }
 
-                bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
-                
-                if (
-                    instanceCountChange
-                    || face.instances == null
-                    || face.instances.Count != face.positions.Count
-                )
+            //... switched to Faces
+            if (prevDecoratorType != BoxBrushDecorationType.FACE && decorator.type == BoxBrushDecorationType.FACE)
+            {
+                foreach (var face in decorator.faceStates)
                 {
-                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
-                    BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
-                }
+                    if (face.isMuted)
+                    {
+                        BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                        BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                        continue;
+                    }
+
+                    bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
                 
-                BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+                    if (
+                        instanceCountChange
+                        || face.instances == null
+                        || face.instances.Count != face.positions.Count
+                    )
+                    {
+                        BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                        BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                    }
+                
+                    BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+                }
+            }
+            
+            //... just update Faces
+            if (decorator.type == BoxBrushDecorationType.FACE)
+            {
+                foreach (var face in decorator.faceStates)
+                {
+                    if (face.isMuted)
+                    {
+                        BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                        BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                        continue;
+                    }
+
+                    bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                    
+                    if (
+                        instanceCountChange
+                        || face.instances == null
+                        || face.instances.Count != face.positions.Count
+                    )
+                    {
+                        BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                        BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                    }
+                    
+                    BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+                }
             }
         }
+    }
+
+    void ClearFaces()
+    {
+        foreach(var face in decorator.faceStates)
+            BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
     }
 
     public void OnSceneGUI()

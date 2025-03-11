@@ -31,7 +31,10 @@ public static class BoxBrushDecoratorActions
                 return;
             }
 
-            instance.transform.SetLocalPositionAndRotation(face.positions[i], Quaternion.identity);
+            instance.transform.SetLocalPositionAndRotation(
+                face.positions[i], 
+                Quaternion.LookRotation(face.normal, face.tangent)
+                );
         }
     }
 

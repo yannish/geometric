@@ -140,7 +140,6 @@ public class BoxBrushDecorator : MonoBehaviour
 #endif
     }
 
-    
     void DrawFaces()
     {
         if (!type.HasFlag(BoxBrushDecorationType.FACE))
@@ -209,6 +208,6 @@ public class BoxBrushDecorator : MonoBehaviour
 
     public void OnAfterDeserialize()
     {
-        Debug.LogWarning("on after serialized boxBrush!");
+        // Debug.LogWarning("on after serialized boxBrush!");
     }
 }
