@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEditor.EditorTools;
+using UnityEditor.ShortcutManagement;
 using UnityEngine;
 
 [EditorTool("SubGizmo Tool", typeof(SubGizmoMono))]
@@ -56,7 +57,7 @@ public class SubGizmoEditorTool : BaseEditorTool
         EditorGUIUtility.wideMode = true;
         EditorGUIUtility.labelWidth = 85f;
 
-        var rect = new Rect(1000f, 1000f, s_ToolSettingsWindow.width, 24f);
+        var rect = new Rect(0f, 0f, s_ToolSettingsWindow.width, 24f);
         GUI.DragWindow(rect);
         using (var checkScope = new EditorGUI.ChangeCheckScope())
         {
@@ -92,7 +93,7 @@ public class SubGizmoEditorTool : BaseEditorTool
         // base.OnToolGUI(window);
     }
 
-    [UnityEditor.ShortcutManagement.Shortcut("SubGizmo Tool", null, KeyCode.Q)]
+    [UnityEditor.ShortcutManagement.Shortcut("SubGizmo Tool", null, KeyCode.Q, ShortcutModifiers.Alt)]
     static void ToolShortcut()
     {
         if(Selection.GetFiltered<SubGizmoMono>(SelectionMode.TopLevel).Length > 0)

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
@@ -191,5 +192,53 @@ public static class BoxBrushDecoratorActions
         // Debug.LogWarning($"pos count: {face.positions.Count}");
         
         return instanceCountChanged;
+    }
+
+    public static void ClearCorners(this BoxBrushDecorator decorator)
+    {
+        foreach (var corner in decorator.cornerStates)
+        {
+            GameObject.DestroyImmediate(corner.instance);
+            corner.instance = null;
+        }
+    }
+    
+    public static void RecalculateCorners(this BoxBrushDecorator decorator)
+    {
+        foreach(var corner in decorator.cornerStates)
+            decorator.RecalculateCorner(corner);
+    }
+
+    public static void UpdateCorners(this BoxBrushDecorator decorator)
+    {
+        foreach (var corner in decorator.cornerStates)
+        {
+            UpdateCorner(decorator, corner);
+        }
+    }
+
+    private static void UpdateCorner(BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
+    {
+        if (corner.isMuted)
+        {
+            GameObject.DestroyImmediate(corner.instance);
+            corner.instance = null;
+        }
+        else
+        {
+            if (corner.instance == null)
+                corner.instance = PrefabUtility.InstantiatePrefab(decorator.prefab, decorator.transform) as GameObject;
+            corner.instance.transform.SetLocalPositionAndRotation(
+                corner.insetPosition,
+                Quaternion.LookRotation(corner.normal)
+                );
+        }
+    }
+
+    public static void RecalculateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
+    {
+        var cornerDir = BoxBrushDirections.cornerNormalLookup[corner.direction];
+        corner.position = Vector3.Scale(cornerDir, decorator.haldDims);
+        corner.insetPosition = corner.position + corner.normal * corner.insetAmount;
     }
 }

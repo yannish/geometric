@@ -16,6 +16,13 @@ public class BoxBrushDebug
     public float drawCenterSize = 0.3f;
     public float drawSpaceSize = 0.5f;
     public float drawAAThickness = 3f;
+
+    public float drawDottedLineSpacing = 0.2f;
+    
+    public float elementSelectionSize = 1f;
+    public float elementSelectedInflation = 1.2f;
+    public float elementPickSize = 2f;
+    
     public Vector3 drawWireCubeSize = Vector3.one;
 }
 
@@ -71,12 +78,26 @@ public class BoxBrushDecoratorFace
     public float span;
     public float effectiveSpan;
 
-    // public float calculatedPropSize;
-    
     public List<Vector3> positions;
     public List<GameObject> instances;
 }
 
+[Serializable]
+public class BoxBrushDecoratorCorner
+{
+    //... CONFIGURED:
+    public bool isMuted;
+    [FormerlySerializedAs("inset")] public float insetAmount = 0.25f;
+    
+    //... CALCULATED:
+    public Vector3 position;
+    public Vector3 insetPosition;
+    public GameObject instance;
+    
+    //... PRE-BAKED:
+    public Vector3 normal; //... this is flattened-out, but maybe that's an optional thing?
+    public BoxBrushCornerType direction;
+}
 
 [Serializable]
 public struct BoxBrushDimensions
@@ -103,22 +124,45 @@ public class BoxBrushDecorator : MonoBehaviour
     public BoxBrushDecorationType type;
 
     
+    #region PROPERTIES:
+    public Vector3 dims => new Vector3(dimensions.width, dimensions.height, dimensions.depth);
+    public Vector3 haldDims => dims * 0.5f;
+    #endregion
+    
+    
     #region FACES
-
     public const int MAX_INSTANCES_PER_FACE = 100;
-    
-    public BoxBrushDirection face;
-    
     public BoxBrushDecoratorFace[] faceStates = new BoxBrushDecoratorFace[4];
-    
     #endregion
     
     #region CORNERS
+    public BoxBrushDecoratorCorner[] cornerStates;// = new BoxBrushDecoratorCorner[8];
     #endregion
     
     #region EDGES
     #endregion
 
+    private void Reset()
+    {
+        
+    }
+
+    [ContextMenu("Initialize Corners")]
+    public void InitializeCorners()
+    {
+        cornerStates = new BoxBrushDecoratorCorner[8];
+        var keys = BoxBrushDirections.cornerNormalLookup.Keys;
+        int i = 0;
+        foreach (var kvp in BoxBrushDirections.cornerNormalLookup)
+        {
+            cornerStates[i] = new BoxBrushDecoratorCorner();
+            cornerStates[i].direction = kvp.Key;
+            cornerStates[i].position = Vector3.Scale(kvp.Value, haldDims);
+            cornerStates[i].insetPosition = cornerStates[i].position + cornerStates[i].normal * cornerStates[i].insetAmount;
+            cornerStates[i].normal = -kvp.Value.FlatInXZ().normalized;
+            i++;
+        }
+    }
 
     void OnDrawGizmos()
     {
@@ -134,12 +178,13 @@ public class BoxBrushDecorator : MonoBehaviour
             Handles.zTest = prevHandlesDrawTest;
         }
         
-        DrawFaces();
-        DrawEdges();
         DrawCorners();
+        DrawEdges();
+        DrawFaces();
 #endif
     }
 
+    
     void DrawFaces()
     {
         if (!type.HasFlag(BoxBrushDecorationType.FACE))
@@ -191,8 +236,48 @@ public class BoxBrushDecorator : MonoBehaviour
     
     void DrawCorners()
     {
-        if (!type.HasFlag(BoxBrushDecorationType.CORNER))
+        if (type != BoxBrushDecorationType.CORNER)
             return;
+        
+        var prevHandlesMatrix = Handles.matrix;
+        var prevGizmosMatrix = Gizmos.matrix;
+        
+        Handles.matrix = transform.localToWorldMatrix;
+        Gizmos.matrix = transform.localToWorldMatrix;
+
+        var instanceDrawSize = prefab != null ? calculatedPrefabSize : tempPrefabSize;
+        instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
+        
+        for (int i = 0; i < cornerStates.Length; i++)
+        {
+            var corner = cornerStates[i];
+            if (debug.drawFaceOrientation)
+            {
+                Gizmos.DrawWireSphere(corner.position, debug.drawCenterSize);
+
+                using(new ColorContext(Color.blue))
+                    Handles.DrawAAPolyLine(debug.drawAAThickness, corner.position, corner.position + corner.normal * debug.drawSpaceSize);
+
+                // using(new ColorContext(Color.yellow))
+                //     Handles.DrawAAPolyLine(debug.drawAAThickness, corner.position, corner.position + Vector3.up * debug.drawSpaceSize);
+                //
+                // using(new ColorContext(Color.red))
+                //     Handles.DrawAAPolyLine(debug.drawAAThickness, corner.position, corner.position + Vector3.right * debug.drawSpaceSize);
+            }
+            
+            if (corner.isMuted)
+                continue;
+            
+            //... draw our final positions:
+            using (ColorPick.Swatches.boxBrushCenter.ctx)
+            {
+                Handles.DrawWireCube(corner.insetPosition, Vector3.one * instanceDrawSize);
+                Handles.DrawDottedLine(corner.position, corner.insetPosition, debug.drawDottedLineSpacing);
+            }
+        }
+        
+        Handles.matrix = prevHandlesMatrix;
+        Gizmos.matrix = prevGizmosMatrix;
     }
     
     void DrawEdges()
@@ -201,6 +286,7 @@ public class BoxBrushDecorator : MonoBehaviour
             return;
     }
 
+    
     public void OnBeforeSerialize()
     {
         // Debug.LogWarning("on before serialized boxBrush!");
