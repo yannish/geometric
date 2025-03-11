@@ -70,19 +70,19 @@ public static class BoxBrushDecoratorActions
         bool instanceCountChanged = false;
         int prevInstanceCount = face.positions.Count;
         
-        float faceLength = decorator.dimensions.height;
+        float faceLength = decorator.dims.y;
         if (face.orientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH)
         {
             switch (face.direction)
             {
                 case BoxBrushDirection.FORWARD:
                 case BoxBrushDirection.BACKWARD:
-                    faceLength = decorator.dimensions.width;
+                    faceLength = decorator.dims.x;
                     break;
                 
                 case BoxBrushDirection.LEFT:
                 case BoxBrushDirection.RIGHT:
-                    faceLength = decorator.dimensions.depth;
+                    faceLength = decorator.dims.z;
                     break;
             }
         }
@@ -92,17 +92,17 @@ public static class BoxBrushDecoratorActions
         {
             case BoxBrushDirection.FORWARD:
             case BoxBrushDirection.BACKWARD:
-                faceDistance = decorator.dimensions.depth * 0.5f;
+                faceDistance = decorator.dims.z * 0.5f;
                 break;
             
             case BoxBrushDirection.LEFT:
             case BoxBrushDirection.RIGHT:
-                faceDistance = decorator.dimensions.width * 0.5f;
+                faceDistance = decorator.dims.x * 0.5f;
                 break;
             
             case BoxBrushDirection.UP:
             case BoxBrushDirection.DOWN:
-                faceDistance = decorator.dimensions.height * 0.5f;
+                faceDistance = decorator.dims.y * 0.5f;
                 break;
         }
 
@@ -238,7 +238,7 @@ public static class BoxBrushDecoratorActions
     public static void RecalculateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
     {
         var cornerDir = BoxBrushDirections.cornerNormalLookup[corner.direction];
-        corner.position = Vector3.Scale(cornerDir, decorator.haldDims);
+        corner.position = Vector3.Scale(cornerDir, decorator.halfDims);
         var effectiveInset = corner.overrideInsetAmount
             ? corner.insetAmount
             : decorator.cornerSettings.insetAmount;

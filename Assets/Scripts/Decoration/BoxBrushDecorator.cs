@@ -152,10 +152,21 @@ public class BoxBrushDecorator : MonoBehaviour
     
     public BoxBrushDecorationType type;
 
+    private BoxCollider _boxCollider;
+    BoxCollider BoxCollider
+    {
+        get
+        {
+            if(_boxCollider == null)
+                _boxCollider = GetComponent<BoxCollider>();
+            return _boxCollider;
+        }
+    }
     
     #region PROPERTIES:
-    public Vector3 dims => new Vector3(dimensions.width, dimensions.height, dimensions.depth);
-    public Vector3 haldDims => dims * 0.5f;
+    public Vector3 dims => BoxCollider.size;
+    public Vector3 halfDims => dims * 0.5f;
+    // public Vector3 dims => new Vector3(dimensions.width, dimensions.height, dimensions.depth);
     #endregion
     
     
@@ -188,7 +199,7 @@ public class BoxBrushDecorator : MonoBehaviour
         {
             cornerStates[i] = new BoxBrushDecoratorCorner();
             cornerStates[i].direction = kvp.Key;
-            cornerStates[i].position = Vector3.Scale(kvp.Value, haldDims);
+            cornerStates[i].position = Vector3.Scale(kvp.Value, halfDims);
             cornerStates[i].insetAmount = cornerSettings.insetAmount;
             // var effectiveInset = cornerStates[i].overrideInsetAmount ?
             cornerStates[i].insetPosition = cornerStates[i].position + cornerStates[i].normal * cornerStates[i].insetAmount;
@@ -206,7 +217,7 @@ public class BoxBrushDecorator : MonoBehaviour
             var prevHandlesDrawTest = Handles.zTest;
             Handles.zTest = CompareFunction.Less;
             Handles.matrix = transform.localToWorldMatrix;
-            Handles.DrawWireCube(Vector3.zero, new Vector3(dimensions.width, dimensions.height, dimensions.depth));
+            Handles.DrawWireCube(Vector3.zero, new Vector3(dims.x, dims.y, dims.z));
             Handles.matrix = prevHandlesMatrix;
             Handles.zTest = prevHandlesDrawTest;
         }
