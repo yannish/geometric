@@ -12,6 +12,7 @@ using UnityEngine.Serialization;
 [Serializable]
 public class BoxBrushDebug
 {
+    public bool drawFaceOrientation;
     public float drawCenterSize = 0.3f;
     public float drawSpaceSize = 0.5f;
     public float drawAAThickness = 3f;
@@ -55,7 +56,7 @@ public class BoxBrushDecoratorFace
     public BoxBrushDirection direction;
     public BoxBrushFaceDecoratorOrientation orientation;
     public bool fill;
-    // [Range(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
+    [Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
     public int numInstances;
     public float padding;
     public float spacing;
@@ -149,18 +150,21 @@ public class BoxBrushDecorator : MonoBehaviour
         for (int i = 0; i < faceStates.Length; i++)
         {
             var face = faceStates[i];
+
+            if (debug.drawFaceOrientation)
+            {
+                Gizmos.DrawWireSphere(face.center, debug.drawCenterSize);
+                
+                using(new ColorContext(Color.blue))
+                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.normal * debug.drawSpaceSize);
+
+                using(new ColorContext(Color.yellow))
+                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.tangent * debug.drawSpaceSize);
+
+                using(new ColorContext(Color.red))
+                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.bitangent * debug.drawSpaceSize);
+            }
             
-            Gizmos.DrawWireSphere(face.center, debug.drawCenterSize);
-            
-            using(new ColorContext(Color.blue))
-                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.normal * debug.drawSpaceSize);
-
-            using(new ColorContext(Color.yellow))
-                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.tangent * debug.drawSpaceSize);
-
-            using(new ColorContext(Color.red))
-                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.bitangent * debug.drawSpaceSize);
-
             if (face.isMuted)
                 continue;
             

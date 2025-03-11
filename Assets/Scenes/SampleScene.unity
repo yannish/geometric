@@ -150,6 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debug:
+    drawFaceOrientation: 0
     drawCenterSize: 0.3
     drawSpaceSize: 0.5
     drawAAThickness: 3
@@ -552,6 +553,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debug:
+    drawFaceOrientation: 1
     drawCenterSize: 0.06
     drawSpaceSize: 0.5
     drawAAThickness: 3
@@ -568,8 +570,8 @@ MonoBehaviour:
   - isMuted: 0
     direction: 0
     orientation: 0
-    fill: 0
-    numInstances: 5
+    fill: 1
+    numInstances: 7
     padding: 0.74
     spacing: 0
     instanceSize: 0.4
@@ -581,44 +583,62 @@ MonoBehaviour:
     effectiveSpan: 4.33
     positions:
     - {x: -1.9649999, y: 0, z: 4.19}
-    - {x: -0.98249996, y: 0, z: 4.19}
-    - {x: 0, y: 0, z: 4.19}
-    - {x: 0.9825001, y: 0, z: 4.19}
+    - {x: -1.5283332, y: 0, z: 4.19}
+    - {x: -1.0916666, y: 0, z: 4.19}
+    - {x: -0.655, y: 0, z: 4.19}
+    - {x: -0.21833324, y: 0, z: 4.19}
+    - {x: 0.21833348, y: 0, z: 4.19}
+    - {x: 0.655, y: 0, z: 4.19}
+    - {x: 1.0916667, y: 0, z: 4.19}
+    - {x: 1.5283334, y: 0, z: 4.19}
     - {x: 1.9649999, y: 0, z: 4.19}
     instances: []
-  - isMuted: 1
+  - isMuted: 0
     direction: 1
     orientation: 0
     fill: 0
-    numInstances: 0
-    padding: 0
+    numInstances: 5
+    padding: 0.74
     spacing: 0
-    instanceSize: 0
-    center: {x: 0, y: 0, z: -3}
+    instanceSize: 0.4
+    center: {x: 0, y: 0, z: -4.19}
     normal: {x: -0, y: -0, z: 1}
     tangent: {x: 0, y: 1, z: 0}
     bitangent: {x: -1, y: 0, z: 0}
     span: 0
-    effectiveSpan: 4
+    effectiveSpan: 4.33
     positions:
-    - {x: 1.95, y: 0, z: -3}
+    - {x: 1.9649999, y: 0, z: -4.19}
+    - {x: 0.98249996, y: 0, z: -4.19}
+    - {x: 0, y: 0, z: -4.19}
+    - {x: -0.9825001, y: 0, z: -4.19}
+    - {x: -1.9649999, y: 0, z: -4.19}
     instances: []
-  - isMuted: 1
+  - isMuted: 0
     direction: 3
     orientation: 0
     fill: 0
-    numInstances: 0
-    padding: 0
+    numInstances: 10
+    padding: 0.15
     spacing: 0
-    instanceSize: 0
-    center: {x: 2, y: 0, z: 0}
+    instanceSize: 0.4
+    center: {x: 2.905, y: 0, z: 0}
     normal: {x: -1, y: -0, z: -0}
     tangent: {x: 0, y: 1, z: 0}
     bitangent: {x: 0, y: 0, z: -1}
     span: 0
-    effectiveSpan: 6
+    effectiveSpan: 8.08
     positions:
-    - {x: 2, y: 0, z: 2.95}
+    - {x: 2.905, y: 0, z: 3.84}
+    - {x: 2.905, y: 0, z: 2.9866667}
+    - {x: 2.905, y: 0, z: 2.1333332}
+    - {x: 2.905, y: 0, z: 1.28}
+    - {x: 2.905, y: 0, z: 0.4266665}
+    - {x: 2.905, y: 0, z: -0.4266665}
+    - {x: 2.905, y: 0, z: -1.28}
+    - {x: 2.905, y: 0, z: -2.1333334}
+    - {x: 2.905, y: 0, z: -2.986667}
+    - {x: 2.905, y: 0, z: -3.84}
     instances: []
   - isMuted: 1
     direction: 2
@@ -739,6 +759,52 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &712347847
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 712347849}
+  - component: {fileID: 712347848}
+  m_Layer: 0
+  m_Name: dummy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &712347848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 712347847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34cb8a996b2f5584983c89da14bfd9a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clampedInt: 0
+  clampedFloat: 2.2
+--- !u!4 &712347849
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 712347847}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.1367054, y: -9.767857, z: -1.6854116}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1093,3 +1159,4 @@ SceneRoots:
   - {fileID: 310069009}
   - {fileID: 8804529245241090391}
   - {fileID: 473654779}
+  - {fileID: 712347849}

@@ -75,12 +75,10 @@ public static class BoxBrushDecoratorActions
                 break;
         }
 
-        // Vector3 decoratorCenter = decorator.transform.position;
         face.normal = -BoxBrushDirections.brushDirLookup[face.direction];
         face.tangent = BoxBrushDirections.tangentLookup[face.direction];
         face.bitangent = BoxBrushDirections.bitangentLookup[face.direction];
         face.center = -face.normal * faceDistance;
-        // face.center = decoratorCenter + -face.normal * faceDistance;
 
         face.effectiveSpan = faceLength - 2f * face.padding;
         
@@ -107,7 +105,6 @@ public static class BoxBrushDecoratorActions
         //... TODO: if we're applying "spacing", it will act like a min on this separation padding, and 
         //... then effectiveNumInstances will need to be recalculated.
          
-
         face.positions.Clear();
 
         if (effectiveNumInstances < 1)
