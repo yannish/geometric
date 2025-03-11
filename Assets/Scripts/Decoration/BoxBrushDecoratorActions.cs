@@ -239,6 +239,9 @@ public static class BoxBrushDecoratorActions
     {
         var cornerDir = BoxBrushDirections.cornerNormalLookup[corner.direction];
         corner.position = Vector3.Scale(cornerDir, decorator.haldDims);
-        corner.insetPosition = corner.position + corner.normal * corner.insetAmount;
+        var effectiveInset = corner.overrideInsetAmount
+            ? corner.insetAmount
+            : decorator.cornerSettings.insetAmount;
+        corner.insetPosition = corner.position + corner.normal * effectiveInset;
     }
 }

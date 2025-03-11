@@ -16,6 +16,7 @@ public class BoxBrushDebug
     public float drawCenterSize = 0.3f;
     public float drawSpaceSize = 0.5f;
     public float drawAAThickness = 3f;
+    public float drawCornerArrowSize = 3f;
 
     public float drawDottedLineSpacing = 0.2f;
     
@@ -24,6 +25,21 @@ public class BoxBrushDebug
     public float elementPickSize = 2f;
     
     public Vector3 drawWireCubeSize = Vector3.one;
+}
+
+[Serializable]
+public class BoxDecoratorCornerSettings
+{
+    public float insetAmount = 0.25f;
+}
+
+[Serializable]
+public class BoxDecoratorFaceSettings
+{
+    public float padding;
+    public float spacing;
+    public bool fill;
+    public int instanceCount = 4;
 }
 
 // [Flags]
@@ -62,11 +78,20 @@ public class BoxBrushDecoratorFace
     public bool isMuted;
     public BoxBrushDirection direction;
     public BoxBrushFaceDecoratorOrientation orientation;
+
+    public bool overrideFill;
     public bool fill;
+
+    public bool overrideInstanceCount;
     [Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
     public int numInstances;
+
+    public bool overridePadding;
     public float padding;
+    
+    public bool overrideSpacing;
     public float spacing;
+    
     public float instanceSize; // should be calc'd eventually
     
     //... CALCULATED:
@@ -87,7 +112,9 @@ public class BoxBrushDecoratorCorner
 {
     //... CONFIGURED:
     public bool isMuted;
-    [FormerlySerializedAs("inset")] public float insetAmount = 0.25f;
+    public bool overrideInsetAmount;
+    [ShowIf("overrideInsetAmount")]
+    public float insetAmount = 0.25f;
     
     //... CALCULATED:
     public Vector3 position;
@@ -111,6 +138,8 @@ public struct BoxBrushDimensions
 public class BoxBrushDecorator : MonoBehaviour
     , ISerializationCallbackReceiver
 {
+    public string decoratorName;
+    
     public BoxBrushDebug debug;
     
     public GameObject prefab;
@@ -131,11 +160,13 @@ public class BoxBrushDecorator : MonoBehaviour
     
     
     #region FACES
+    public BoxDecoratorFaceSettings faceSettings;
     public const int MAX_INSTANCES_PER_FACE = 100;
     public BoxBrushDecoratorFace[] faceStates = new BoxBrushDecoratorFace[4];
     #endregion
     
     #region CORNERS
+    public BoxDecoratorCornerSettings cornerSettings;
     public BoxBrushDecoratorCorner[] cornerStates;// = new BoxBrushDecoratorCorner[8];
     #endregion
     
@@ -158,6 +189,8 @@ public class BoxBrushDecorator : MonoBehaviour
             cornerStates[i] = new BoxBrushDecoratorCorner();
             cornerStates[i].direction = kvp.Key;
             cornerStates[i].position = Vector3.Scale(kvp.Value, haldDims);
+            cornerStates[i].insetAmount = cornerSettings.insetAmount;
+            // var effectiveInset = cornerStates[i].overrideInsetAmount ?
             cornerStates[i].insetPosition = cornerStates[i].position + cornerStates[i].normal * cornerStates[i].insetAmount;
             cornerStates[i].normal = -kvp.Value.FlatInXZ().normalized;
             i++;
@@ -251,12 +284,28 @@ public class BoxBrushDecorator : MonoBehaviour
         for (int i = 0; i < cornerStates.Length; i++)
         {
             var corner = cornerStates[i];
+            // var effectiveInset = corner.overrideInsetAmount ? corner.insetAmount : cornerSettings.insetAmount;
+
             if (debug.drawFaceOrientation)
             {
                 Gizmos.DrawWireSphere(corner.position, debug.drawCenterSize);
 
-                using(new ColorContext(Color.blue))
-                    Handles.DrawAAPolyLine(debug.drawAAThickness, corner.position, corner.position + corner.normal * debug.drawSpaceSize);
+                //... draw corner normal:
+                using (new ColorContext(Color.blue))
+                {
+                    Handles.ArrowHandleCap(
+                        -1,
+                        corner.position + Vector3.up * 0.2f,
+                        Quaternion.LookRotation(corner.normal),
+                        debug.drawCornerArrowSize,
+                        EventType.Repaint
+                        );
+                    
+                    Handles.DrawAAPolyLine(
+                        debug.drawAAThickness,
+                        corner.position, corner.position + corner.normal * debug.drawSpaceSize
+                        );
+                }
 
                 // using(new ColorContext(Color.yellow))
                 //     Handles.DrawAAPolyLine(debug.drawAAThickness, corner.position, corner.position + Vector3.up * debug.drawSpaceSize);

@@ -9,7 +9,9 @@ public class BoxBrushDecoratorInspector : Editor
 {
     private SerializedProperty typeProp;
     private SerializedProperty faceStatesProp;
+    private SerializedProperty faceSettingsProp;
     private SerializedProperty cornerStatesProp;
+    private SerializedProperty cornerSettingsProp;
     private SerializedProperty dimsProp;
     private SerializedProperty debugProp;
     private SerializedProperty prefabProp;
@@ -30,7 +32,9 @@ public class BoxBrushDecoratorInspector : Editor
         typeProp = serializedObject.FindProperty("type");
 
         faceStatesProp = serializedObject.FindProperty("faceStates");
+        faceSettingsProp = serializedObject.FindProperty("faceSettings");
         cornerStatesProp = serializedObject.FindProperty("cornerStates");
+        cornerSettingsProp = serializedObject.FindProperty("cornerSettings");
         dimsProp = serializedObject.FindProperty("dimensions");
         debugProp = serializedObject.FindProperty("debug");
         prefabProp = serializedObject.FindProperty("prefab");
@@ -71,8 +75,8 @@ public class BoxBrushDecoratorInspector : Editor
     {
         
     }
-
     
+
     public override void OnInspectorGUI()
     {
         decoratorDirtied = false;
@@ -97,9 +101,18 @@ public class BoxBrushDecoratorInspector : Editor
         
         EditorGUI.BeginChangeCheck();
         
+        EditorGUILayout.LabelField("SETTINGS:", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(debugProp);
+        EditorGUILayout.PropertyField(faceSettingsProp);
+        EditorGUILayout.PropertyField(cornerSettingsProp);
+        EditorGUILayout.Space(20f);
+        
+        EditorGUILayout.LabelField("CONFIG:", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(typeProp);
         EditorGUILayout.PropertyField(dimsProp);
+        EditorGUILayout.Space(20f);
 
+        EditorGUILayout.LabelField("STATES:", EditorStyles.boldLabel);
         var prevDecoratorType = decorator.type;
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(typeProp);
@@ -126,27 +139,28 @@ public class BoxBrushDecoratorInspector : Editor
             serializedObject.ApplyModifiedProperties();
 
             //... CORNERS:
-            // if (
-            //     changedPrefabAsset
-            //     || (prevDecoratorType == BoxBrushDecorationType.CORNER && decorator.type != BoxBrushDecorationType.CORNER)
-            // )
-            // {
-            //     Debug.LogWarning("CLEARING CORNERS!");
-            //     decorator.RecalculateCorners();
-            //     decorator.ClearCorners();
-            // }
-            //
-            // if (prevDecoratorType != BoxBrushDecorationType.CORNER && decorator.type == BoxBrushDecorationType.CORNER)
-            // {
-            //     decorator.RecalculateCorners();
-            //     decorator.UpdateCorners();
-            // }
-            //
-            // if (decorator.type == BoxBrushDecorationType.CORNER)
-            // {
-            //     decorator.RecalculateCorners();
-            //     decorator.UpdateCorners();
-            // }
+            if (
+                changedPrefabAsset
+                || (prevDecoratorType == BoxBrushDecorationType.CORNER && decorator.type != BoxBrushDecorationType.CORNER)
+            )
+            {
+                Debug.LogWarning("CLEARING CORNERS!");
+                decorator.RecalculateCorners();
+                decorator.ClearCorners();
+            }
+            
+            if (prevDecoratorType != BoxBrushDecorationType.CORNER && decorator.type == BoxBrushDecorationType.CORNER)
+            {
+                decorator.RecalculateCorners();
+                decorator.UpdateCorners();
+            }
+            
+            if (decorator.type == BoxBrushDecorationType.CORNER)
+            {
+                Debug.LogWarning("Updating corners.");
+                decorator.RecalculateCorners();
+                decorator.UpdateCorners();
+            }
             
             
             //... switched off Faces
@@ -228,8 +242,6 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
 
-
-
     public void OnSceneGUI()
     {
         TickOnInspectorInput();
@@ -240,6 +252,7 @@ public class BoxBrushDecoratorInspector : Editor
         DrawEdgeControls();
     }
 
+    
     private void DrawEdgeControls()
     {
         
@@ -339,34 +352,5 @@ public class BoxBrushDecoratorInspector : Editor
             e.Use();
         }
     }
-    //
-    // void DrawGroups()
-    // {
-    //     if (decorator.type.HasFlag(BoxBrushDecorationType.EDGE))
-    //     {
-    //         using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
-    //         {
-    //             EditorGUILayout.LabelField("EDGE:");
-    //             EditorGUILayout.Space();
-    //         }
-    //     }
-    //
-    //     if (decorator.type.HasFlag(BoxBrushDecorationType.FACE))
-    //     {
-    //         using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
-    //         {
-    //             EditorGUILayout.LabelField("FACE:");
-    //             EditorGUILayout.Space();
-    //         }
-    //     }
-    //
-    //     if (decorator.type.HasFlag(BoxBrushDecorationType.CORNER))
-    //     {
-    //         using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
-    //         {
-    //             EditorGUILayout.LabelField("CORNER:");
-    //             EditorGUILayout.Space();
-    //         }
-    //     }
-    // }
+    
 }
