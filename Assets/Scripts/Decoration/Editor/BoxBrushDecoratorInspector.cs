@@ -65,6 +65,19 @@ public class BoxBrushDecoratorInspector : Editor
         
         serializedObject.DrawScriptField();
         serializedObject.Update();
+
+        if (GUILayout.Button("CLEAR ALL"))
+        {
+            foreach (var face in decorator.faceStates)
+            {
+                foreach (var instance in face.instances)
+                {
+                    DestroyImmediate(instance);
+                }
+                
+                face.instances.Clear();
+            }
+        }
         
         EditorGUI.BeginChangeCheck();
         
@@ -82,14 +95,23 @@ public class BoxBrushDecoratorInspector : Editor
             foreach (var face in decorator.faceStates)
             {
                 if (face.isMuted)
+                {
+                    BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
                     continue;
-            
+                }
+
+                bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                
                 if (
-                    BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face)
-                    || face.instances == null 
+                    instanceCountChange
+                    || face.instances == null
                     || face.instances.Count != face.positions.Count
-                    )
+                )
+                {
+                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
                     BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                }
                 
                 BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
             }

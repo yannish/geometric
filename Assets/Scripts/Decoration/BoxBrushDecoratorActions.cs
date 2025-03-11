@@ -7,6 +7,14 @@ using UnityEngine.TextCore.Text;
 
 public static class BoxBrushDecoratorActions
 {
+    public static void ClearDecoratorFaceInstance(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    {
+        foreach(var instance in face.instances) 
+            GameObject.DestroyImmediate(instance);
+
+        face.instances.Clear();
+    }
+    
     public static void RealignDecoratorFaceInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         if (face.positions.Count != face.instances.Count)
@@ -31,15 +39,15 @@ public static class BoxBrushDecoratorActions
     {
         Debug.LogWarning("Reinstantiating prefabs!");
 
-        var allChildGameObjects = decorator.gameObject
-            .GetComponentsInChildren<Transform>(true)
-            .Where(t => t != decorator.transform);
+        // var allChildGameObjects = decorator.gameObject
+        //     .GetComponentsInChildren<Transform>(true)
+        //     .Where(t => t != decorator.transform);
+        //
+        // foreach(var instance in allChildGameObjects) 
+        //     GameObject.DestroyImmediate(instance.gameObject);
         
-        foreach(var instance in allChildGameObjects) 
-            GameObject.DestroyImmediate(instance.gameObject);
-        
-        // foreach(var instance in face.instances) 
-        //     GameObject.DestroyImmediate(instance);
+        foreach(var instance in face.instances) 
+            GameObject.DestroyImmediate(instance);
 
         face.instances.Clear();
         
