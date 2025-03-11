@@ -50,7 +50,11 @@ public class ShowIfPropertyDrawer : PropertyDrawer
         {
             // Try reflection (for private fields, properties, etc.)
             object target = property.serializedObject.targetObject;
-            FieldInfo field = target.GetType().GetField(showIf.conditionField, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            FieldInfo field = target.GetType().GetField(
+                showIf.conditionField,
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
+                );
+            
             if (field != null)
             {
                 object fieldValue = field.GetValue(target);

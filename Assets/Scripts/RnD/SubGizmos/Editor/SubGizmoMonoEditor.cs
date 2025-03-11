@@ -9,15 +9,25 @@ public class SubGizmoMonoEditor : Editor
 {
     Dictionary<int, string> handleLookup = new Dictionary<int, string>();
 
-    private int selectedHandle = -1;
+    public int selectedHandle = -1;
+    public SubGizmoCorner? selectedSubgizmoCorner;
+    public SubGizmoDirection? selectedSubgizmoFace;
 
     private SerializedProperty quickDatasProp;
     private SerializedProperty typeProp;
+    private SerializedProperty dataArrayProp;
 
     private void OnEnable()
     {
         quickDatasProp = serializedObject.FindProperty("quickDatas");
         typeProp = serializedObject.FindProperty("subGizmoType");
+        dataArrayProp = serializedObject.FindProperty("dataArray");
+    }
+
+    private void OnDisable()
+    {
+        selectedSubgizmoCorner = null;
+        selectedSubgizmoFace = null;
     }
 
     public override void OnInspectorGUI()
@@ -31,6 +41,7 @@ public class SubGizmoMonoEditor : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(typeProp);
         EditorGUILayout.PropertyField(quickDatasProp);
+        EditorGUILayout.PropertyField(dataArrayProp);
         if (EditorGUI.EndChangeCheck())
         {
             serializedObject.ApplyModifiedProperties();
@@ -186,10 +197,14 @@ public class SubGizmoMonoEditor : Editor
                 if (kvp.Key <= 4)
                 {
                     Debug.Log($"Selected Handle: {(SubGizmoDirection)kvp.Key}");
+                    selectedSubgizmoFace = (SubGizmoDirection)kvp.Key;
+                    selectedSubgizmoCorner = null;
                 }
                 else
                 {
                     Debug.Log($"Selected Handle: {(SubGizmoCorner)kvp.Key}");
+                    selectedSubgizmoCorner = (SubGizmoCorner)kvp.Key;
+                    selectedSubgizmoFace = null;
                 }
                 
                 selectedHandle = kvp.Key;

@@ -6,11 +6,15 @@ using UnityEngine;
 [EditorTool("SubGizmo Tool", typeof(SubGizmoMono))]
 public class SubGizmoEditorTool : BaseEditorTool
 {
-    static Rect s_ToolSettingsWindow = new Rect(10f, 30f, 256f, 105f);
+    static Rect s_ToolSettingsWindow = new Rect(10f, 30f, 256f, 205f);
     
     SubGizmoMono subGizmoMono;
     
     SubGizmoMonoEditor subGizmoMonoEditor;
+
+    private SerializedProperty arrayProp;
+    
+    private SerializedObject serializedObject;
     
     public SubGizmoEditorTool()
     {
@@ -30,6 +34,10 @@ public class SubGizmoEditorTool : BaseEditorTool
     {
         Debug.LogWarning("SubGizmo tool activated.");
         subGizmoMono = target as SubGizmoMono;
+        serializedObject = new SerializedObject(subGizmoMono);
+        arrayProp = serializedObject.FindProperty("dataArray");
+        if(arrayProp != null)
+            Debug.LogWarning("found data array");
         
         ActiveEditorTracker editorTracker = ActiveEditorTracker.sharedTracker;
         Editor[] editors = editorTracker.activeEditors;
@@ -54,11 +62,13 @@ public class SubGizmoEditorTool : BaseEditorTool
     {
         var previousWideMode = EditorGUIUtility.wideMode;
         var previousLabelWidth = EditorGUIUtility.labelWidth;
+        
         EditorGUIUtility.wideMode = true;
         EditorGUIUtility.labelWidth = 85f;
 
-        var rect = new Rect(0f, 0f, s_ToolSettingsWindow.width, 24f);
+        var rect = new Rect(0f, 0f, s_ToolSettingsWindow.width, 50f);
         GUI.DragWindow(rect);
+        
         using (var checkScope = new EditorGUI.ChangeCheckScope())
         {
             // using(var disabledScope = new EditorGUI.DisabledGroupScope(m_HandleMode == HandleMode.AutoSmooth))
@@ -73,6 +83,33 @@ public class SubGizmoEditorTool : BaseEditorTool
                 else
                 {
                     subGizmoMono.quickFloat = EditorGUILayout.FloatField(subGizmoMono.quickFloat);
+                }
+            }
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                if (subGizmoMonoEditor.selectedSubgizmoCorner != null)
+                {
+                    EditorGUILayout.LabelField(
+                        $"Selected corner: {subGizmoMonoEditor.selectedSubgizmoCorner}, " +
+                        $"int value: {(int)subGizmoMonoEditor.selectedSubgizmoCorner}"
+                        );
+                    if (arrayProp != null)
+                    {
+                        var arrayElement = arrayProp.GetArrayElementAtIndex((int)subGizmoMonoEditor.selectedSubgizmoCorner - 5);
+                        DrawSubGizmoData(arrayElement);
+                    }
+                    // SerializedProperty
+                }
+
+                if (subGizmoMonoEditor.selectedSubgizmoFace != null)
+                {
+                    EditorGUILayout.LabelField($"Selected face: {subGizmoMonoEditor.selectedSubgizmoFace}");
+                    // if (arrayProp != null)
+                    // {
+                    //     var arrayElement = arrayProp.GetArrayElementAtIndex((int)subGizmoMonoEditor.selectedSubgizmoFace);
+                    //     DrawSubGizmoData(arrayElement);
+                    // }
                 }
             }
 
@@ -91,6 +128,16 @@ public class SubGizmoEditorTool : BaseEditorTool
     {
         s_ToolSettingsWindow = GUI.Window(42, s_ToolSettingsWindow, InSceneWindow, "DECORATION ELEMENT");
         // base.OnToolGUI(window);
+    }
+
+    void DrawSubGizmoData(SerializedProperty prop)
+    {
+        SerializedProperty boolProp = prop.FindPropertyRelative("quickBool");
+        SerializedProperty floatProp = prop.FindPropertyRelative("quickFloat");
+        SerializedProperty stringProp = prop.FindPropertyRelative("quickString");
+        EditorGUILayout.PropertyField(boolProp);
+        EditorGUILayout.PropertyField(floatProp);
+        EditorGUILayout.PropertyField(stringProp);
     }
 
     [UnityEditor.ShortcutManagement.Shortcut("SubGizmo Tool", null, KeyCode.Q, ShortcutModifiers.Alt)]

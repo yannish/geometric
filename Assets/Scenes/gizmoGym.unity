@@ -148,31 +148,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 353372b6801b64847b109316324526a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  quickFloat: 8
+  quickFloat: 0
   subGizmoType: 1
   size: 5
   grabSize: 1
   quickDatas:
-  - shownFloat: 6
-    calculatedFloat: 3
-    calculatedPositions:
-    - {x: 0, y: 0, z: 0}
-    - {x: 1, y: 0, z: 0}
-    - {x: 2, y: 0, z: 0}
-  - shownFloat: 2
-    calculatedFloat: 1
-    calculatedPositions:
-    - {x: 0, y: 0, z: 0}
-  - shownFloat: 3
-    calculatedFloat: 1.5
-    calculatedPositions:
-    - {x: 0, y: 0, z: 0}
-  - shownFloat: 6
-    calculatedFloat: 3
-    calculatedPositions:
-    - {x: 0, y: 0, z: 0}
-    - {x: 1, y: 0, z: 0}
-    - {x: 2, y: 0, z: 0}
+  - shownFloat: 0
+    calculatedFloat: 0
+    calculatedPositions: []
+  - shownFloat: 0
+    calculatedFloat: 0
+    calculatedPositions: []
+  - shownFloat: 0
+    calculatedFloat: 0
+    calculatedPositions: []
+  - shownFloat: 0
+    calculatedFloat: 0
+    calculatedPositions: []
+  dataArray:
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
+  - quickBool: 0
+    quickFloat: 0
+    quickString: 
 --- !u!4 &506558404
 Transform:
   m_ObjectHideFlags: 0

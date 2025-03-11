@@ -80,16 +80,19 @@ public class BoxBrushDecoratorFace
     public BoxBrushFaceDecoratorOrientation orientation;
 
     public bool overrideFill;
+    [ShowIf("overrideFill")]
     public bool fill;
 
     public bool overrideInstanceCount;
-    [Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
+    [ShowIf("overridePadding"), Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
     public int numInstances;
 
     public bool overridePadding;
+    [ShowIf("overridePadding")]
     public float padding;
     
     public bool overrideSpacing;
+    [ShowIf("overrideSpacing")]
     public float spacing;
     
     public float instanceSize; // should be calc'd eventually

@@ -41,14 +41,7 @@ public static class BoxBrushDecoratorActions
 
     public static void RegeneratePrefabInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
-        Debug.LogWarning("Reinstantiating prefabs!");
-
-        // var allChildGameObjects = decorator.gameObject
-        //     .GetComponentsInChildren<Transform>(true)
-        //     .Where(t => t != decorator.transform);
-        //
-        // foreach(var instance in allChildGameObjects) 
-        //     GameObject.DestroyImmediate(instance.gameObject);
+        // Debug.LogWarning("Reinstantiating prefabs!");
         
         foreach(var instance in face.instances) 
             GameObject.DestroyImmediate(instance);
@@ -111,7 +104,8 @@ public static class BoxBrushDecoratorActions
         face.bitangent = BoxBrushDirections.bitangentLookup[face.direction];
         face.center = -face.normal * faceDistance;
 
-        face.effectiveSpan = faceLength - 2f * face.padding;
+        float effectivePadding = face.overridePadding ? face.padding : decorator.faceSettings.padding;
+        face.effectiveSpan = faceLength - 2f * effectivePadding;
 
         decorator.calculatedPrefabSize = -1f;
         
@@ -149,24 +143,24 @@ public static class BoxBrushDecoratorActions
         int maxInstancesBySize = Mathf.FloorToInt(face.effectiveSpan / clampedInstanceSize);
         
         // Debug.LogWarning($"maxInstancesBySize: {maxInstancesBySize}");
+
+        float effectiveSpacing = face.overrideSpacing ? face.spacing : decorator.faceSettings.spacing;
         
-        var effectiveNumInstances = !face.fill 
-            ? Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) 
-            : maxInstancesBySize;
+        int filledInstanceCount =
+            Mathf.FloorToInt((face.effectiveSpan - effectiveSpacing) / (clampedInstanceSize + effectiveSpacing));
+        
+        var effectiveNumInstances = face.fill 
+            ? filledInstanceCount
+            : Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) ;
         
         effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE);
-        
-        // if(effectiveNumInstances > 0)
-        //     Debug.LogWarning($"effectiveNumInstances: {effectiveNumInstances}");
+
         
         var totalInnerPadding = face.effectiveSpan - effectiveNumInstances * clampedInstanceSize;
         var separationPadding = effectiveNumInstances <= 1 
             ? 0f
             : totalInnerPadding / (effectiveNumInstances - 1);
         
-        //... TODO: if we're applying "spacing", it will act like a min on this separation padding, and 
-        //... then effectiveNumInstances will need to be recalculated.
-         
         face.positions.Clear();
 
         if (effectiveNumInstances < 1)
@@ -235,7 +229,7 @@ public static class BoxBrushDecoratorActions
         }
     }
 
-    public static void RecalculateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
+    private static void RecalculateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
     {
         var cornerDir = BoxBrushDirections.cornerNormalLookup[corner.direction];
         corner.position = Vector3.Scale(cornerDir, decorator.halfDims);

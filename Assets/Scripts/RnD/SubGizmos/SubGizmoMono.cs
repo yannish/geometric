@@ -63,6 +63,7 @@ public class SubGizmoMono : MonoBehaviour
     [Serializable]
     public class SubGizmoDataA
     {
+        public bool quickBool;
         public float quickFloat;
         public string quickString;
     }
@@ -89,6 +90,11 @@ public class SubGizmoMono : MonoBehaviour
     public float grabSize = 1f;
     
     public QuickDataClass[] quickDatas = new QuickDataClass[4];
-}
+    
+    public SubGizmoDataA[] dataArray = new SubGizmoDataA[8];
 
-// public void Draw
+    private void Reset()
+    {
+        
+    }
+}
