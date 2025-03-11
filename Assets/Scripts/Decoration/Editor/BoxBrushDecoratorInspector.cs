@@ -1,4 +1,5 @@
 using System;
+using NUnit.Framework.Constraints;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,7 +11,12 @@ public class BoxBrushDecoratorInspector : Editor
     private SerializedProperty faceStatesProp;
     private SerializedProperty dimsProp;
     private SerializedProperty debugProp;
+    private SerializedProperty prefabProp;    
+    
     private BoxBrushDecorator decorator;
+    private BoxColliderExtendedEditor boxColliderExtendedEditor;
+    private bool objectDirtied = false;
+
     
     private void OnEnable()
     {
@@ -21,28 +27,89 @@ public class BoxBrushDecoratorInspector : Editor
         faceStatesProp = serializedObject.FindProperty("faceStates");
         dimsProp = serializedObject.FindProperty("dimensions");
         debugProp = serializedObject.FindProperty("debug");
-    }
+        prefabProp = serializedObject.FindProperty("prefab");
+        
+        ActiveEditorTracker editorTracker = ActiveEditorTracker.sharedTracker;
+        Editor[] editors = editorTracker.activeEditors;
 
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-        
-        EditorGUILayout.PropertyField(debugProp);
-        EditorGUILayout.PropertyField(typeProp);
-        EditorGUILayout.PropertyField(dimsProp);
-        
-        DrawFaceContent();
-        
-        if (serializedObject.hasModifiedProperties)
+        foreach (var editor in editors)
         {
-            serializedObject.ApplyModifiedProperties();
-            foreach (var face in decorator.faceStates)
+            if (editor.target is BoxCollider)
             {
-                
+                boxColliderExtendedEditor = editor as BoxColliderExtendedEditor;
+                boxColliderExtendedEditor.OnBoxColliderChanged -= HandleBoxColliderEdit;
+                boxColliderExtendedEditor.OnBoxColliderChanged += HandleBoxColliderEdit;
             }
         }
     }
 
+    private void OnDisable()
+    {
+        if(boxColliderExtendedEditor != null)
+            boxColliderExtendedEditor.OnBoxColliderChanged -= HandleBoxColliderEdit;
+    }
+
+    private void HandleBoxColliderEdit()
+    {
+        
+    }
+
+    public override void OnInspectorGUI()
+    {
+        objectDirtied = false;
+        
+        serializedObject.DrawScriptField();
+        serializedObject.Update();
+        
+        EditorGUI.BeginChangeCheck();
+        
+        EditorGUILayout.PropertyField(debugProp);
+        EditorGUILayout.PropertyField(typeProp);
+        EditorGUILayout.PropertyField(dimsProp);
+        EditorGUILayout.PropertyField(prefabProp);
+        
+        DrawFaceContent();
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            serializedObject.ApplyModifiedProperties();
+            foreach (var face in decorator.faceStates)
+            {
+                if (face.isMuted)
+                    continue;
+            
+                if (BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face))
+                    BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                
+                BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+            }
+        }
+    }
+
+    public void OnSceneGUI()
+    {
+        Event e = Event.current;
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Keypad1 )// && e.modifiers == EventModifiers.Shift)
+        {
+            Debug.LogWarning("Pressed 1 key!");
+        }
+        
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Keypad2)
+        {
+            Debug.LogWarning("Pressed 2 key!");
+        }
+        
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Keypad3)
+        {
+            Debug.LogWarning("Pressed 3 key!");
+        }
+    }
+
+    void DrawFaceContent()
+    {
+        EditorGUILayout.PropertyField(faceStatesProp);
+    }
+    
     void DrawGroups()
     {
         if (decorator.type.HasFlag(BoxBrushDecorationType.EDGE))
@@ -78,38 +145,5 @@ public class BoxBrushDecoratorInspector : Editor
         
     }
 
-    void DrawFaceContent()
-    {
-        // EditorGUILayout.PropertyField(faceFlagsProp);
 
-        // for (int i = 0; i < faceStatesProp.arraySize; i++)
-        // {
-        //     var prop = faceStatesProp.GetArrayElementAtIndex(i);
-        //     var relProp = prop.FindPropertyRelative("isMuted");
-        //     EditorGUILayout.PropertyField(relProp);
-        //     EditorGUILayout.PropertyField(prop);
-        // }
-        
-        // EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(faceStatesProp);
-
-
-        // if (EditorGUI.EndChangeCheck())
-        // {
-        //     Debug.LogWarning("Tweaked something in facestates!");
-        //     // bool reinstantiatPrefabs = false;
-        //     foreach (var face in decorator.faceStates)
-        //     {
-        //         if (face.isMuted)
-        //             continue;
-        //
-        //         if (BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face))
-        //         {
-        //             BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
-        //         }
-        //         
-        //         BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
-        //     }
-        // }
-    }
 }

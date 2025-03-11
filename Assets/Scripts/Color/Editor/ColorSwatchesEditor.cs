@@ -15,7 +15,6 @@ public class ColorSwatchesEditor : Editor
         SceneView.duringSceneGui += DuringSceneGUI;
     }
 
-
     private void OnDisable()
     {
         SceneView.duringSceneGui -= DuringSceneGUI;
@@ -25,33 +24,6 @@ public class ColorSwatchesEditor : Editor
     {
         
     }
-
-    private void OnSceneGUI()
-    {
-        
-    }
-
-    // public override void OnInspectorGUI()
-    // {
-    //     // serializedObject.Update();
-    //     // EditorGUILayout.PropertyField(testFloatProp);
-    //     // if (serializedObject.ApplyModifiedProperties())
-    //     // {
-    //     //     Debug.LogWarning("ApplyModifiedProperties!");
-    //     // }
-    //     
-    //     EditorGUI.BeginChangeCheck();
-    //     
-    //     base.OnInspectorGUI();
-    //     
-    //     GUILayout.Label("HAI");
-    //     
-    //     if (EditorGUI.EndChangeCheck())
-    //     {
-    //         Debug.LogWarning("ApplyModifiedProperties!");
-    //         SceneView.RepaintAll();
-    //     }
-    // }
 
     public void OnValidate()
     {

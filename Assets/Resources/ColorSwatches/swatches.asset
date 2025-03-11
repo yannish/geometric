@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boxBrushWire:
     UseConstant: 1
-    ConstantColor: {r: 1, g: 1, b: 1, a: 1}
+    ConstantColor: {r: 0.4945653, g: 0.8207547, b: 0.42973477, a: 1}
     ColorVariable: {fileID: 0}
   boxBrushCenter:
     UseConstant: 1

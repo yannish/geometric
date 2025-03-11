@@ -75,11 +75,12 @@ public static class BoxBrushDecoratorActions
                 break;
         }
 
-        Vector3 decoratorCenter = decorator.transform.position;
+        // Vector3 decoratorCenter = decorator.transform.position;
         face.normal = -BoxBrushDirections.brushDirLookup[face.direction];
         face.tangent = BoxBrushDirections.tangentLookup[face.direction];
         face.bitangent = BoxBrushDirections.bitangentLookup[face.direction];
-        face.center = decoratorCenter + -face.normal * faceDistance;
+        face.center = -face.normal * faceDistance;
+        // face.center = decoratorCenter + -face.normal * faceDistance;
 
         face.effectiveSpan = faceLength - 2f * face.padding;
         
@@ -108,6 +109,9 @@ public static class BoxBrushDecoratorActions
          
 
         face.positions.Clear();
+
+        if (effectiveNumInstances < 1)
+            return prevInstanceCount != face.positions.Count;
         
         if (effectiveNumInstances == 1)
         {

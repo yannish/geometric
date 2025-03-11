@@ -4,6 +4,8 @@ using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEditor.ShaderGraph;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.VirtualTexturing;
 using UnityEngine.Serialization;
 
 
@@ -16,7 +18,7 @@ public class BoxBrushDebug
     public Vector3 drawWireCubeSize = Vector3.one;
 }
 
-[Flags]
+// [Flags]
 public enum BoxBrushDecorationType
 {
     FACE = 1 << 0,
@@ -81,6 +83,7 @@ public struct BoxBrushDimensions
     public float depth;
 }
 
+[RequireComponent(typeof(BoxCollider))]
 public class BoxBrushDecorator : MonoBehaviour
 {
     public BoxBrushDebug debug;
@@ -110,27 +113,19 @@ public class BoxBrushDecorator : MonoBehaviour
     #region EDGES
     #endregion
 
-    private void OnValidate()
-    {
-        if (type.HasFlag(BoxBrushDecorationType.FACE))
-        {
-            // Debug.LogWarning("... recalculating brush faces.");
-        
-            for (int i = 0; i < 4; i++)
-            {
-                if (faceStates[i].isMuted)
-                    continue;
-                BoxBrushDecoratorActions.RecalculateDecoratorFace(this, faceStates[i]);
-            }
-        }
-    }
 
     void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         using (ColorPick.Swatches.boxBrushWire.ctx)
         {
-            Handles.DrawWireCube(transform.position, new Vector3(dimensions.width, dimensions.height, dimensions.depth));
+            var prevHandlesMatrix = Handles.matrix;
+            var prevHandlesDrawTest = Handles.zTest;
+            Handles.zTest = CompareFunction.Less;
+            Handles.matrix = transform.localToWorldMatrix;
+            Handles.DrawWireCube(Vector3.zero, new Vector3(dimensions.width, dimensions.height, dimensions.depth));
+            Handles.matrix = prevHandlesMatrix;
+            Handles.zTest = prevHandlesDrawTest;
         }
         
         DrawFaces();
@@ -145,29 +140,42 @@ public class BoxBrushDecorator : MonoBehaviour
         if (!type.HasFlag(BoxBrushDecorationType.FACE))
             return;
 
-        using (ColorPick.Swatches.boxBrushCenter.ctx)
+        var prevHandlesMatrix = Handles.matrix;
+        var prevGizmosMatrix = Gizmos.matrix;
+        
+        Handles.matrix = transform.localToWorldMatrix;
+        Gizmos.matrix = transform.localToWorldMatrix;
+        
+        for (int i = 0; i < faceStates.Length; i++)
         {
-            for (int i = 0; i < faceStates.Length; i++)
-            {
-                var face = faceStates[i];
-                if (face.isMuted)
-                    continue;
-                
-                Gizmos.DrawWireSphere(face.center, debug.drawCenterSize);
-                
-                using(new ColorContext(Color.blue))
-                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.normal * debug.drawSpaceSize);
+            var face = faceStates[i];
+            
+            Gizmos.DrawWireSphere(face.center, debug.drawCenterSize);
+            
+            using(new ColorContext(Color.blue))
+                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.normal * debug.drawSpaceSize);
 
-                using(new ColorContext(Color.yellow))
-                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.tangent * debug.drawSpaceSize);
-    
-                using(new ColorContext(Color.red))
-                    Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.bitangent * debug.drawSpaceSize);
-                
-                foreach(var pos in face.positions)
-                    Handles.DrawWireCube(pos, Vector3.one * face.instanceSize);
+            using(new ColorContext(Color.yellow))
+                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.tangent * debug.drawSpaceSize);
+
+            using(new ColorContext(Color.red))
+                Handles.DrawAAPolyLine(debug.drawAAThickness, face.center, face.center + face.bitangent * debug.drawSpaceSize);
+
+            if (face.isMuted)
+                continue;
+            
+            //... draw our final positions:
+            using (ColorPick.Swatches.boxBrushCenter.ctx)
+            {
+                foreach (var localPos in face.positions)
+                {
+                    Handles.DrawWireCube(localPos, Vector3.one * face.instanceSize);
+                }
             }
         }
+        
+        Handles.matrix = prevHandlesMatrix;
+        Gizmos.matrix = prevGizmosMatrix;
     }
     
     void DrawCorners()
