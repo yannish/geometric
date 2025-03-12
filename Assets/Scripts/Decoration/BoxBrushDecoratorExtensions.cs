@@ -12,11 +12,11 @@ public static class BoxBrushDecoratorExtensions
     {
         foreach (var edge in decorator.edgeStates)
         {
-            ClearDecoratorEdge(decorator, edge);
+            ClearEdge(decorator, edge);
         }
     }
 
-    private static void ClearDecoratorEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    public static void ClearEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
         foreach(var instance in edge.instances)
             GameObject.DestroyImmediate(instance);
@@ -95,12 +95,12 @@ public static class BoxBrushDecoratorExtensions
         
         int maxInstancesBySize = Mathf.FloorToInt(edge.effectiveSpan / clampedInstanceSize);
 
-        float effectiveSpacing = edge.overrideSpacing ? edge.spacing : decorator.faceSettings.spacing;
+        float effectiveSpacing = edge.overrideSpacing ? edge.spacing : decorator.edgeSettings.spacing;
         
         int filledInstanceCount =
             Mathf.FloorToInt((edge.effectiveSpan - effectiveSpacing) / (clampedInstanceSize + effectiveSpacing));
 
-        var effectiveFill = edge.overrideFill ? edge.fill : decorator.faceSettings.fill;
+        var effectiveFill = edge.overrideFill ? edge.fill : decorator.edgeSettings.fill;
 
         var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount

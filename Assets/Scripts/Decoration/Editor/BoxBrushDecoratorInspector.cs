@@ -127,21 +127,26 @@ public class BoxBrushDecoratorInspector : Editor
             EditorGUILayout.LabelField("SETTINGS:", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(debugProp);
-            EditorGUILayout.PropertyField(cornerSettingsProp);
-            EditorGUILayout.PropertyField(edgeSettingsProp);
-            EditorGUILayout.PropertyField(faceSettingsProp);
+            switch (decorator.type)
+            {
+                case BoxBrushDecorationType.FACE:
+                    EditorGUILayout.PropertyField(faceSettingsProp);
+                    break;
+                case BoxBrushDecorationType.CORNER:
+                    EditorGUILayout.PropertyField(cornerSettingsProp);
+                    break;
+                case BoxBrushDecorationType.EDGE:
+                    EditorGUILayout.PropertyField(edgeSettingsProp);
+                    break;
+            }
             EditorGUI.indentLevel--;
         }
         EditorGUILayout.Space(k_groupSpacing);
         
         
-
-        
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("STATES:", EditorStyles.boldLabel);
-            
-            
             EditorGUI.indentLevel++;
             switch (decorator.type)
             {
@@ -172,7 +177,7 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
     
-    void DrawConfigContent()
+    private void DrawConfigContent()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
@@ -233,7 +238,6 @@ public class BoxBrushDecoratorInspector : Editor
         EditorGUILayout.Space(k_groupSpacing);
     }
     
-
     private void DrawPresetControls()
     {
         switch (decorator.type)
@@ -311,27 +315,82 @@ public class BoxBrushDecoratorInspector : Editor
                 break;
             
             case BoxBrushDecorationType.EDGE:
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("FULL"))
+                    {
+                        foreach (var corner in decorator.edgeStates)
+                            corner.isMuted = false;
+                    }
+                    if (GUILayout.Button("CEILING"))
+                    {
+                        foreach (var edge in decorator.edgeStates)
+                        {
+                            edge.isMuted =
+                                edge.type != BoxBrushEdge.BACK_TOP
+                                && edge.type != BoxBrushEdge.FRONT_TOP
+                                && edge.type != BoxBrushEdge.MID_TOP_LEFT
+                                && edge.type != BoxBrushEdge.MID_TOP_RIGHT;
+                        }
+                    }
+                    if (GUILayout.Button("FLOOR"))
+                    {
+                        foreach (var edge in decorator.edgeStates)
+                        {
+                            edge.isMuted =
+                                edge.type != BoxBrushEdge.BACK_BOTTOM
+                                  && edge.type != BoxBrushEdge.FRONT_BOTTOM
+                                  && edge.type != BoxBrushEdge.MID_BOTTOM_LEFT
+                                  && edge.type != BoxBrushEdge.MID_BOTTOM_RIGHT;
+                        }
+                    }
+                    if (GUILayout.Button("HORIZONTAL"))
+                    {
+                        foreach (var edge in decorator.edgeStates)
+                        {
+                            edge.isMuted =
+                            !(edge.type == BoxBrushEdge.FRONT_LEFT
+                               || edge.type == BoxBrushEdge.FRONT_RIGHT
+                               || edge.type == BoxBrushEdge.BACK_LEFT
+                               || edge.type == BoxBrushEdge.BACK_RIGHT);
+                        }
+                    }
+                    if (GUILayout.Button("VERTICAL"))
+                    {
+                        foreach (var edge in decorator.edgeStates)
+                        {
+                            edge.isMuted =
+                                (edge.type == BoxBrushEdge.FRONT_LEFT
+                                  || edge.type == BoxBrushEdge.FRONT_RIGHT
+                                  || edge.type == BoxBrushEdge.BACK_LEFT
+                                  || edge.type == BoxBrushEdge.BACK_RIGHT);
+                        }
+                    }
+                }
                 break;
         }
     }
 
-    private void SnapLowerBoundsToPivot()
+    
+    public void UpdateDirtyDecorator()
     {
-        // if (decorator.BoxCollider == null)
-        //     return;
-        //
-        // var pivotPosLocal = decorator.transform.position
-        // var centerToPivot = decorator.BoxCollider.center.To
-        // decorator.BoxCollider.
+        UpdateCorners();
+        UpdateEdges();
+        UpdateFaces();
+        
+        
+
+
+        
     }
 
-    public void UpdateDirtyDecorator()
+    void UpdateCorners()
     {
         //... CORNERS:
         if (
             changedPrefabAsset
             || (prevDecoratorType == BoxBrushDecorationType.CORNER && decorator.type != BoxBrushDecorationType.CORNER)
-            )
+        )
         {
             Debug.LogWarning("CLEARING CORNERS!");
             decorator.RecalculateCorners();
@@ -350,12 +409,15 @@ public class BoxBrushDecoratorInspector : Editor
             decorator.RecalculateCorners();
             decorator.UpdateCorners();
         }
-        
+    }
+    
+    void UpdateFaces()
+    {
         //... switched off Faces
         if (
             changedPrefabAsset
             || (prevDecoratorType == BoxBrushDecorationType.FACE && decorator.type != BoxBrushDecorationType.FACE)
-            )
+        )
         {
             Debug.LogWarning("CLEARING FACES");
             foreach (var face in decorator.faceStates)
@@ -364,8 +426,7 @@ public class BoxBrushDecoratorInspector : Editor
                 BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
             }
         }
-
-
+        
         //... switched to Faces
         if (prevDecoratorType != BoxBrushDecorationType.FACE && decorator.type == BoxBrushDecorationType.FACE)
         {
@@ -423,20 +484,79 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
 
-    void UpdateCorners()
-    {
-        
-    }
-    
-    void UpdateFaces()
-    {
-        
-    }
-
     void UpdateEdges()
     {
+        //... switched off Edges
+        if (
+            changedPrefabAsset
+            || (prevDecoratorType == BoxBrushDecorationType.EDGE && decorator.type != BoxBrushDecorationType.EDGE)
+        )
+        {
+            Debug.LogWarning("CLEARING EDGES");
+            foreach (var edge in decorator.edgeStates)
+            {
+                BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
+                BoxBrushDecoratorExtensions.ClearEdge(decorator, edge);
+            }
+        }
         
+        //... switched to Edges
+        if (prevDecoratorType != BoxBrushDecorationType.EDGE && decorator.type == BoxBrushDecorationType.EDGE)
+        {
+            foreach (var edge in decorator.edgeStates)
+            {
+                if (edge.isMuted)
+                {
+                    BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
+                    BoxBrushDecoratorExtensions.ClearEdge(decorator, edge);
+                    continue;
+                }
+
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
+            
+                if (
+                    instanceCountChange
+                    || edge.instances == null
+                    || edge.instances.Count != edge.positions.Count
+                )
+                {
+                    BoxBrushDecoratorExtensions.ClearEdge(decorator, edge);
+                    BoxBrushDecoratorExtensions.RegenerateEdgeInstances(decorator, edge);
+                }
+            
+                BoxBrushDecoratorExtensions.RealignEdgeInstances(decorator, edge);
+            }
+        }
+        
+        //... just update Edges
+        if (decorator.type == BoxBrushDecorationType.EDGE)
+        {
+            foreach (var edge in decorator.edgeStates)
+            {
+                if (edge.isMuted)
+                {
+                    BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
+                    BoxBrushDecoratorExtensions.ClearEdge(decorator, edge);
+                    continue;
+                }
+
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
+                
+                if (
+                    instanceCountChange
+                    || edge.instances == null
+                    || edge.instances.Count != edge.positions.Count
+                )
+                {
+                    BoxBrushDecoratorExtensions.ClearEdge(decorator, edge);
+                    BoxBrushDecoratorExtensions.RegenerateEdgeInstances(decorator, edge);
+                }
+                
+                BoxBrushDecoratorExtensions.RealignEdgeInstances(decorator, edge);
+            }
+        }
     }
+    
     
     public void OnSceneGUI()
     {
@@ -445,18 +565,17 @@ public class BoxBrushDecoratorInspector : Editor
 
         DrawCornerSelectionControls();
         // DrawCornerControls();
-        DrawFaceControls();
-        DrawEdgeControls();
+        DrawFaceSelectionControls();
+        DrawEdgeSelectionControls();
     }
-
     
-    private void DrawEdgeControls()
+    private void DrawEdgeSelectionControls()
     {
         if (decorator.type != BoxBrushDecorationType.EDGE)
             return;
     }
 
-    private void DrawFaceControls()
+    private void DrawFaceSelectionControls()
     {
         if (decorator.type != BoxBrushDecorationType.FACE)
             return;
@@ -510,7 +629,7 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
 
-    void DrawCornerSelectionControls()
+    private void DrawCornerSelectionControls()
     {
         if (decorator.type != BoxBrushDecorationType.CORNER)
             return;
@@ -643,4 +762,15 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
     
+    
+    private void SnapLowerBoundsToPivot()
+    {
+        // if (decorator.BoxCollider == null)
+        //     return;
+        //
+        // var pivotPosLocal = decorator.transform.position
+        // var centerToPivot = decorator.BoxCollider.center.To
+        // decorator.BoxCollider.
+    }
+
 }
