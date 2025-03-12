@@ -9,11 +9,16 @@ using UnityEngine.PlayerLoop;
 public class BoxBrushDecoratorInspector : Editor
 {
     private SerializedProperty typeProp;
-    private SerializedProperty faceStatesProp;
-    private SerializedProperty faceSettingsProp;
+    
     private SerializedProperty cornerStatesProp;
+    private SerializedProperty edgeStatesProp;
+    private SerializedProperty faceStatesProp;
+    
     private SerializedProperty cornerSettingsProp;
-    private SerializedProperty dimsProp;
+    private SerializedProperty edgeSettingsProp;
+    private SerializedProperty faceSettingsProp;
+    
+    // private SerializedProperty dimsProp;
     private SerializedProperty debugProp;
     private SerializedProperty prefabProp;
     private SerializedProperty calculatedPrefabSizeProp;
@@ -29,7 +34,7 @@ public class BoxBrushDecoratorInspector : Editor
     //... SELECTION:
     public BoxBrushDirection? selectedFace;
     public BoxBrushCornerType? selectedCorner;
-    // public BoxBrushEdge? selectedEdge;
+    public BoxBrushEdge? selectedEdge;
     
     private const float k_groupSpacing = 6f;
     
@@ -41,17 +46,20 @@ public class BoxBrushDecoratorInspector : Editor
         typeProp = serializedObject.FindProperty("type");
 
         faceStatesProp = serializedObject.FindProperty("faceStates");
-        faceSettingsProp = serializedObject.FindProperty("faceSettings");
         cornerStatesProp = serializedObject.FindProperty("cornerStates");
+        edgeStatesProp = serializedObject.FindProperty("edgeStates");
+        
+        faceSettingsProp = serializedObject.FindProperty("faceSettings");
         cornerSettingsProp = serializedObject.FindProperty("cornerSettings");
-        dimsProp = serializedObject.FindProperty("dimensions");
+        edgeSettingsProp = serializedObject.FindProperty("edgeSettings");
+        // dimsProp = serializedObject.FindProperty("dimensions");
+        
         debugProp = serializedObject.FindProperty("debug");
         prefabProp = serializedObject.FindProperty("prefab");
         calculatedPrefabSizeProp = serializedObject.FindProperty("calculatedPrefabSize");
         
         ActiveEditorTracker editorTracker = ActiveEditorTracker.sharedTracker;
         Editor[] editors = editorTracker.activeEditors;
-
         foreach (var editor in editors)
         {
             if (editor.target is BoxCollider)
@@ -89,8 +97,8 @@ public class BoxBrushDecoratorInspector : Editor
         Debug.LogWarning("box collider was edited, reacting");
         UpdateDirtyDecorator();
     }
-    
-    
+
+
     public override void OnInspectorGUI()
     {
         decoratorDirtied = false;
@@ -100,14 +108,17 @@ public class BoxBrushDecoratorInspector : Editor
         serializedObject.Update();
         
         EditorGUI.BeginChangeCheck();
+        
+        DrawConfigContent();
+        
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("CONTROLS:", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("PRESETS:", EditorStyles.boldLabel);
             DrawPresetControls();
-            if (GUILayout.Button("SNAP LOWER BOUNDS TO PIVOT"))
-            {
-                SnapLowerBoundsToPivot();
-            }
+            // if (GUILayout.Button("SNAP LOWER BOUNDS TO PIVOT"))
+            // {
+            //     SnapLowerBoundsToPivot();
+            // }
         }
         EditorGUILayout.Space(k_groupSpacing);
 
@@ -116,46 +127,43 @@ public class BoxBrushDecoratorInspector : Editor
             EditorGUILayout.LabelField("SETTINGS:", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(debugProp);
-            EditorGUILayout.PropertyField(faceSettingsProp);
             EditorGUILayout.PropertyField(cornerSettingsProp);
+            EditorGUILayout.PropertyField(edgeSettingsProp);
+            EditorGUILayout.PropertyField(faceSettingsProp);
             EditorGUI.indentLevel--;
         }
         EditorGUILayout.Space(k_groupSpacing);
         
+        
+
+        
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("CONFIG:", EditorStyles.boldLabel);  
-            EditorGUILayout.PropertyField(typeProp);
-            EditorGUILayout.PropertyField(dimsProp);
-        }
-        EditorGUILayout.Space(k_groupSpacing);
-
-        EditorGUILayout.LabelField("STATES:", EditorStyles.boldLabel);
-        prevDecoratorType = decorator.type;
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(typeProp);
-        if (EditorGUI.EndChangeCheck())
-        {
+            EditorGUILayout.LabelField("STATES:", EditorStyles.boldLabel);
             
+            
+            EditorGUI.indentLevel++;
+            switch (decorator.type)
+            {
+                case BoxBrushDecorationType.FACE:
+                    EditorGUILayout.PropertyField(faceStatesProp);
+                    break;
+                case BoxBrushDecorationType.CORNER:
+                    EditorGUILayout.PropertyField(cornerStatesProp);
+                    break;
+                case BoxBrushDecorationType.EDGE:
+                    EditorGUILayout.PropertyField(edgeStatesProp);
+                    break;
+            }
+            EditorGUI.indentLevel--;
         }
-        
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(prefabProp);
-        if (EditorGUI.EndChangeCheck())
-        {
-            Debug.LogWarning("Changed prefab asset.");
-            changedPrefabAsset = true;
-        }
-        
-        EditorGUILayout.PropertyField(calculatedPrefabSizeProp);
-        EditorGUILayout.PropertyField(faceStatesProp);
-        EditorGUILayout.PropertyField(cornerStatesProp);
         
         if (EditorGUI.EndChangeCheck())
         {
             Debug.Log("something changed in brush inspector.");
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             UpdateDirtyDecorator();
+            EditorUtility.SetDirty(decorator);
         }
 
         if (decoratorDirtied)
@@ -163,6 +171,68 @@ public class BoxBrushDecoratorInspector : Editor
             decoratorDirtied = false;
         }
     }
+    
+    void DrawConfigContent()
+    {
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("CONFIG:", EditorStyles.boldLabel);
+            
+            prevDecoratorType = decorator.type;
+            // EditorGUI.BeginChangeCheck();
+            // EditorGUILayout.PropertyField(typeProp);
+            // if (EditorGUI.EndChangeCheck())
+            // {
+            //     
+            // }
+            
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(prefabProp);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Debug.LogWarning("Changed prefab asset.");
+                changedPrefabAsset = true;
+            }
+
+            if (decorator.prefab != null)
+            {
+                GUI.enabled = false;
+                EditorGUILayout.PropertyField(calculatedPrefabSizeProp);
+                GUI.enabled = true;
+            }
+            
+            // EditorGUILayout.PropertyField(typeProp);
+            EditorGUI.BeginChangeCheck();
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("CORNER", EditorStyles.miniButtonLeft))
+                {
+                    decorator.type = BoxBrushDecorationType.CORNER;
+                    // typeProp.enumValueIndex = (int)BoxBrushDecorationType.CORNER;
+                }
+                if (GUILayout.Button ("EDGE", EditorStyles.miniButtonMid)) 
+                {
+                    decorator.type  = BoxBrushDecorationType.EDGE;
+                    // typeProp.enumValueIndex = (int)BoxBrushDecorationType.EDGE;
+                }
+                if (GUILayout.Button ("FACE", EditorStyles.miniButtonRight))
+                {
+                    decorator.type = BoxBrushDecorationType.FACE;
+                    // typeProp.enumValueIndex = (int)BoxBrushDecorationType.FACE;
+                }
+            }
+            if (EditorGUI.EndChangeCheck())
+            {
+                Debug.Log("something changed in RADIO BUTTONS");
+                serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                UpdateDirtyDecorator();
+                EditorUtility.SetDirty(decorator);
+            }
+            // EditorGUILayout.PropertyField(dimsProp);
+        }
+        EditorGUILayout.Space(k_groupSpacing);
+    }
+    
 
     private void DrawPresetControls()
     {
@@ -210,6 +280,11 @@ public class BoxBrushDecoratorInspector : Editor
             case BoxBrushDecorationType.CORNER:
                 using (new EditorGUILayout.HorizontalScope())
                 {
+                    if (GUILayout.Button("FULL"))
+                    {
+                        foreach (var corner in decorator.cornerStates)
+                            corner.isMuted = false;
+                    }
                     if (GUILayout.Button("CEILING"))
                     {
                         foreach (var corner in decorator.cornerStates)
@@ -250,7 +325,7 @@ public class BoxBrushDecoratorInspector : Editor
         // decorator.BoxCollider.
     }
 
-    private void UpdateDirtyDecorator()
+    public void UpdateDirtyDecorator()
     {
         //... CORNERS:
         if (
@@ -312,7 +387,7 @@ public class BoxBrushDecoratorInspector : Editor
                 )
                 {
                     BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
-                    BoxBrushDecoratorExtensions.RegeneratePrefabInstances(decorator, face);
+                    BoxBrushDecoratorExtensions.RegenerateFaceInstances(decorator, face);
                 }
             
                 BoxBrushDecoratorExtensions.RealignDecoratorFaceInstances(decorator, face);
@@ -340,12 +415,27 @@ public class BoxBrushDecoratorInspector : Editor
                 )
                 {
                     BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
-                    BoxBrushDecoratorExtensions.RegeneratePrefabInstances(decorator, face);
+                    BoxBrushDecoratorExtensions.RegenerateFaceInstances(decorator, face);
                 }
                 
                 BoxBrushDecoratorExtensions.RealignDecoratorFaceInstances(decorator, face);
             }
         }
+    }
+
+    void UpdateCorners()
+    {
+        
+    }
+    
+    void UpdateFaces()
+    {
+        
+    }
+
+    void UpdateEdges()
+    {
+        
     }
     
     public void OnSceneGUI()

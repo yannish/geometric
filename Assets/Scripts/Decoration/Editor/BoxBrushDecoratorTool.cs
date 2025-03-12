@@ -7,7 +7,7 @@ using UnityEngine;
 [EditorTool("Decorator Tool", typeof(BoxBrushDecorator))]
 public class BoxBrushDecoratorTool : BaseEditorTool
 {
-    static Rect editElementWindowRect = new Rect(80f, 30f, 256f, 205f);
+    static Rect editElementWindowRect = new Rect(80f, 30f, 300f, 256f);
     
     private BoxBrushDecorator decorator;
     private BoxBrushDecoratorInspector decoratorInspector;
@@ -74,8 +74,8 @@ public class BoxBrushDecoratorTool : BaseEditorTool
         EditorGUIUtility.wideMode = true;
         EditorGUIUtility.labelWidth = 85f;
 
-        var rect = new Rect(0f, 0f, editElementWindowRect.width, 50f);
-        GUI.DragWindow(rect);
+        var rect = new Rect(0f, 0f, editElementWindowRect.width, 24f);
+        // GUI.DragWindow(rect);
 
         using (var checkScope = new EditorGUI.ChangeCheckScope())
         {
@@ -89,15 +89,21 @@ public class BoxBrushDecoratorTool : BaseEditorTool
                     }
                     else
                     {
+                        GUILayout.Space(24f);
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            EditorGUILayout.LabelField($"FACE: ", EditorStyles.boldLabel, GUILayout.Width(40f));
-                            GUIStyle rightAlignStyle = new GUIStyle(EditorStyles.label)
+                            GUIStyle rightAlignStyle = new GUIStyle(EditorStyles.boldLabel)
                             {
                                 alignment = TextAnchor.MiddleRight
                             };
-                            EditorGUILayout.LabelField($" {decoratorInspector.selectedFace}", rightAlignStyle);
+                            EditorGUILayout.LabelField($"FACE: ", rightAlignStyle);//, GUILayout.Width(40f));
+                            GUIStyle leftAlignStyle = new GUIStyle(EditorStyles.label)
+                            {
+                                alignment = TextAnchor.MiddleLeft
+                            };
+                            EditorGUILayout.LabelField($" {decoratorInspector.selectedFace}", leftAlignStyle);
                         }
+                        GUILayout.Space(24f);
                         if (facesProp != null && facesProp.arraySize > 0)
                         {
                             int index = (int)decoratorInspector.selectedFace;
@@ -114,7 +120,26 @@ public class BoxBrushDecoratorTool : BaseEditorTool
                     }
                     else
                     {
-                        EditorGUILayout.LabelField("Select a CORNER to edit it.");
+                        GUILayout.Space(24f);
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUIStyle rightAlignStyle = new GUIStyle(EditorStyles.boldLabel)
+                            {
+                                alignment = TextAnchor.MiddleRight
+                            };
+                            EditorGUILayout.LabelField($"CORNER: ", rightAlignStyle);//, GUILayout.Width(60f));
+                            GUIStyle leftAlignStyle = new GUIStyle(EditorStyles.label)
+                            {
+                                alignment = TextAnchor.MiddleLeft
+                            };
+                            EditorGUILayout.LabelField($" {decoratorInspector.selectedCorner}", leftAlignStyle);
+                        }
+                        GUILayout.Space(24f);
+                        if (facesProp != null && facesProp.arraySize > 0)
+                        {
+                            int index = (int)decoratorInspector.selectedCorner;
+                            DrawCornerElementData(cornersProp.GetArrayElementAtIndex(index));
+                        }
                     }
                     break;
                 
@@ -130,7 +155,8 @@ public class BoxBrushDecoratorTool : BaseEditorTool
             if (checkScope.changed)
             {
                 Debug.LogWarning("made a change to a decorator element through its tool.");
-                serializedObject.ApplyModifiedProperties();
+                serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                decoratorInspector.UpdateDirtyDecorator();
                 EditorUtility.SetDirty(decorator);
                 SceneView.RepaintAll();
             }
@@ -157,11 +183,45 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     
     void DrawFaceElementData(SerializedProperty prop)
     {
-        prop.NextVisible(true);
-        while (prop.NextVisible(false))
+        EditorGUILayout.PropertyField(prop.FindPropertyRelative("isMuted"));
+        EditorGUILayout.PropertyField(prop.FindPropertyRelative("orientation"));
+        
+        var overrideFillProp = prop.FindPropertyRelative("overrideFill");
+        EditorGUILayout.PropertyField(overrideFillProp);
+        if (overrideFillProp.boolValue)
         {
-            EditorGUILayout.PropertyField(prop, true);
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("fill"));
         }
+        
+        var overrideInstanceCountProp = prop.FindPropertyRelative("overrideInstanceCount");
+        EditorGUILayout.PropertyField(overrideInstanceCountProp);
+        if (overrideInstanceCountProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("numInstances"));
+        }
+        
+        var overridePaddingProp = prop.FindPropertyRelative("overridePadding");
+        EditorGUILayout.PropertyField(overridePaddingProp);
+        if (overridePaddingProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("padding"));
+        }
+        
+        var overrideSpacingProp = prop.FindPropertyRelative("overrideSpacing");
+        EditorGUILayout.PropertyField(overrideSpacingProp);
+        if (overrideSpacingProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("spacing"));
+        }
+        
+        // EditorGUILayout.PropertyField(prop.FindPropertyRelative("isMuted"));
+        // EditorGUILayout.PropertyField(prop.FindPropertyRelative("isMuted"));
+
+        // prop.NextVisible(true);
+        // while (prop.NextVisible(false))
+        // {
+        //     EditorGUILayout.PropertyField(prop);
+        // }
         
         // EditorGUILayout.PropertyField(prop);
         
@@ -171,7 +231,14 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     
     void DrawCornerElementData(SerializedProperty prop)
     {
+        EditorGUILayout.PropertyField(prop.FindPropertyRelative("isMuted"));
         
+        var overrideInsetAmountProp = prop.FindPropertyRelative("overrideInsetAmount");
+        EditorGUILayout.PropertyField(overrideInsetAmountProp);
+        if (overrideInsetAmountProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("insetAmount"));
+        }
     }
     
     void DrawEdgeElementData(SerializedProperty prop)

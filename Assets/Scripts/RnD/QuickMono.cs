@@ -6,6 +6,7 @@ public class QuickMono : MonoBehaviour
     [Serializable]
     public class QuickMonoData
     {
+        
         public bool quickBool;
 
         // [ShowIf("quickBool")]
@@ -18,6 +19,8 @@ public class QuickMono : MonoBehaviour
         [ShowIf("quickBool")]
         public string quickString;
     }
+    
+    public int radioButtonInt = 0;
     
     public QuickMonoData quickMonoData;
     

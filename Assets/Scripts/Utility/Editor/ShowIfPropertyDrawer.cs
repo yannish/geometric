@@ -26,11 +26,15 @@ public class ShowIfPropertyDrawer : PropertyDrawer
         ShowIfAttribute showIf = (ShowIfAttribute)attribute;
         SerializedObject serializedObject = property.serializedObject;
         SerializedProperty conditionProperty = serializedObject.FindProperty(showIf.conditionField);
-
-        // SerializedProperty nestedProperty = serializedObject
-        //     .FindProperty(property.propertyPath)
-        //     .FindPropertyRelative(showIf.conditionField);
-        //
+        SerializedProperty nestedProperty = serializedObject.FindProperty(property.propertyPath);
+            // .FindPropertyRelative(showIf.conditionField);
+        SerializedProperty extraNestedProperty = nestedProperty.FindPropertyRelative(showIf.conditionField);
+            
+        if (extraNestedProperty != null)
+        {
+            Debug.LogWarning("found property through its path!");
+        }
+            
         // if (nestedProperty != null)
         // {
         //     // Debug.LogWarning("found property, it was nested!");
