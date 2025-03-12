@@ -79,22 +79,25 @@ public class BoxBrushDecoratorTool : BaseEditorTool
 
         using (var checkScope = new EditorGUI.ChangeCheckScope())
         {
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-            {
-                EditorGUILayout.LabelField("Aight got a label goin.");
-            }
-
             switch (decorator.type)
             {
                 case BoxBrushDecorationType.FACE:
-                    EditorGUILayout.LabelField("Faces");
+                    // EditorGUILayout.LabelField("Faces");
                     if (decoratorInspector.selectedFace == null)
                     {
                         EditorGUILayout.LabelField("Select a FACE to edit it.");
                     }
                     else
                     {
-                        EditorGUILayout.LabelField($"FACE: {decoratorInspector.selectedFace}");
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField($"FACE: ", EditorStyles.boldLabel, GUILayout.Width(40f));
+                            GUIStyle rightAlignStyle = new GUIStyle(EditorStyles.label)
+                            {
+                                alignment = TextAnchor.MiddleRight
+                            };
+                            EditorGUILayout.LabelField($" {decoratorInspector.selectedFace}", rightAlignStyle);
+                        }
                         if (facesProp != null && facesProp.arraySize > 0)
                         {
                             int index = (int)decoratorInspector.selectedFace;
@@ -154,7 +157,16 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     
     void DrawFaceElementData(SerializedProperty prop)
     {
-        EditorGUILayout.PropertyField(prop);
+        prop.NextVisible(true);
+        while (prop.NextVisible(false))
+        {
+            EditorGUILayout.PropertyField(prop, true);
+        }
+        
+        // EditorGUILayout.PropertyField(prop);
+        
+        // var props = prop.GetEnumerator();
+        // while (props.MoveNext())
     }
     
     void DrawCornerElementData(SerializedProperty prop)

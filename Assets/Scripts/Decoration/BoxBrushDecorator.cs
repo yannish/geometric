@@ -78,6 +78,7 @@ public enum BoxBrushFaceDecoratorOrientation
 public class BoxBrushDecoratorFace
 {
     //... BAKED:
+    [HideInInspector]
     public BoxBrushDirection direction;
     
     //... CONFIGURED:

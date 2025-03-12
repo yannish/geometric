@@ -180,8 +180,7 @@ public class BoxBrushDecoratorInspector : Editor
                     {
                         foreach (var face in decorator.faceStates)
                         {
-                            if (face.direction == BoxBrushDirection.UP || face.direction == BoxBrushDirection.DOWN)
-                                face.isMuted = true;
+                            face.isMuted = (face.direction == BoxBrushDirection.UP || face.direction == BoxBrushDirection.DOWN);
                         }
                     }
                     if (GUILayout.Button("CEILING"))
@@ -202,13 +201,40 @@ public class BoxBrushDecoratorInspector : Editor
                     {
                         foreach (var face in decorator.faceStates)
                         {
-                            face.isMuted = !(face.direction != BoxBrushDirection.DOWN && face.direction != BoxBrushDirection.UP);
+                            face.isMuted = (face.direction != BoxBrushDirection.DOWN && face.direction != BoxBrushDirection.UP);
                         }
                     }
                 }
                 break;
+            
             case BoxBrushDecorationType.CORNER:
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("CEILING"))
+                    {
+                        foreach (var corner in decorator.cornerStates)
+                        {
+                            corner.isMuted =
+                                corner.direction != BoxBrushCornerType.BACK_TOP_LEFT
+                                && corner.direction != BoxBrushCornerType.BACK_TOP_RIGHT
+                                && corner.direction != BoxBrushCornerType.FRONT_TOP_RIGHT
+                                && corner.direction != BoxBrushCornerType.FRONT_TOP_LEFT;
+                        }
+                    }
+                    if (GUILayout.Button("FLOOR"))
+                    {
+                        foreach (var corner in decorator.cornerStates)
+                        {
+                            corner.isMuted =
+                                !(corner.direction != BoxBrushCornerType.BACK_TOP_LEFT
+                                  && corner.direction != BoxBrushCornerType.BACK_TOP_RIGHT
+                                  && corner.direction != BoxBrushCornerType.FRONT_TOP_RIGHT
+                                  && corner.direction != BoxBrushCornerType.FRONT_TOP_LEFT);
+                        }
+                    }
+                }
                 break;
+            
             case BoxBrushDecorationType.EDGE:
                 break;
         }
