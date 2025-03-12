@@ -111,8 +111,8 @@ public class BoxBrushDecoratorFace
     public float span;
     public float effectiveSpan;
 
-    public List<Vector3> positions;
-    public List<GameObject> instances;
+    public List<Vector3> positions = new List<Vector3>();
+    public List<GameObject> instances =  new List<GameObject>();
 }
 
 [Serializable]
@@ -226,6 +226,7 @@ public class BoxBrushDecorator : MonoBehaviour
         {
             faceStates[i] = new BoxBrushDecoratorFace();
             faceStates[i].direction = kvp.Key;
+            i++;
         }
     }
 
@@ -283,6 +284,9 @@ public class BoxBrushDecorator : MonoBehaviour
             }
             
             if (face.isMuted)
+                continue;
+
+            if(face.positions == null || face.positions.Count == 0)
                 continue;
             
             //... draw our final positions:

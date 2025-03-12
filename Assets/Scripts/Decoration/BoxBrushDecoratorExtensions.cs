@@ -157,7 +157,9 @@ public static class BoxBrushDecoratorExtensions
         int filledInstanceCount =
             Mathf.FloorToInt((face.effectiveSpan - effectiveSpacing) / (clampedInstanceSize + effectiveSpacing));
         
-        var effectiveNumInstances = face.fill 
+        var effectiveFill = face.overrideFill ? face.fill : decorator.faceSettings.fill;
+        
+        var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount
             : Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) ;
         

@@ -31,7 +31,7 @@ public class BoxBrushDecoratorInspector : Editor
     public BoxBrushCornerType? selectedCorner;
     // public BoxBrushEdge? selectedEdge;
     
-    private const float k_groupSpacing = 12f;
+    private const float k_groupSpacing = 6f;
     
     
     private void OnEnable()
@@ -100,10 +100,10 @@ public class BoxBrushDecoratorInspector : Editor
         serializedObject.Update();
         
         EditorGUI.BeginChangeCheck();
-
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("CONTROLS:", EditorStyles.boldLabel);
+            DrawPresetControls();
             if (GUILayout.Button("SNAP LOWER BOUNDS TO PIVOT"))
             {
                 SnapLowerBoundsToPivot();
@@ -153,6 +153,7 @@ public class BoxBrushDecoratorInspector : Editor
         
         if (EditorGUI.EndChangeCheck())
         {
+            Debug.Log("something changed in brush inspector.");
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             UpdateDirtyDecorator();
         }
@@ -160,6 +161,56 @@ public class BoxBrushDecoratorInspector : Editor
         if (decoratorDirtied)
         {
             decoratorDirtied = false;
+        }
+    }
+
+    private void DrawPresetControls()
+    {
+        switch (decorator.type)
+        {
+            case BoxBrushDecorationType.FACE:
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("FULL"))
+                    {
+                        foreach(var face in decorator.faceStates)
+                            face.isMuted = false;
+                    }
+                    if (GUILayout.Button("WALLS"))
+                    {
+                        foreach (var face in decorator.faceStates)
+                        {
+                            if (face.direction == BoxBrushDirection.UP || face.direction == BoxBrushDirection.DOWN)
+                                face.isMuted = true;
+                        }
+                    }
+                    if (GUILayout.Button("CEILING"))
+                    {
+                        foreach (var face in decorator.faceStates)
+                        {
+                            face.isMuted = face.direction != BoxBrushDirection.UP;
+                        }
+                    }
+                    if (GUILayout.Button("FLOOR"))
+                    {
+                        foreach (var face in decorator.faceStates)
+                        {
+                            face.isMuted = face.direction != BoxBrushDirection.DOWN;
+                        }
+                    }
+                    if (GUILayout.Button("CEILING & FLOOR"))
+                    {
+                        foreach (var face in decorator.faceStates)
+                        {
+                            face.isMuted = !(face.direction != BoxBrushDirection.DOWN && face.direction != BoxBrushDirection.UP);
+                        }
+                    }
+                }
+                break;
+            case BoxBrushDecorationType.CORNER:
+                break;
+            case BoxBrushDecorationType.EDGE:
+                break;
         }
     }
 
@@ -385,7 +436,6 @@ public class BoxBrushDecoratorInspector : Editor
             }
         }
     }
-    
     
     
     void DrawCornerControls()

@@ -27,7 +27,7 @@ public class ColorSwatchesEditor : Editor
 
     public void OnValidate()
     {
-        Debug.LogWarning("ColorSwatchesEditor.OnValidate");
+        // Debug.LogWarning("ColorSwatchesEditor.OnValidate");
         SceneView.RepaintAll();
     }
 }
