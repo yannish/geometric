@@ -6,9 +6,17 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 
-public static class BoxBrushDecoratorActions
+public static class BoxBrushDecoratorExtensions
 {
-    public static void ClearDecoratorFaceInstance(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static void ClearFaces(this BoxBrushDecorator decorator)
+    {
+        foreach (var face in decorator.faceStates)
+        {
+            ClearDecoratorFace(decorator, face);
+        }
+    }
+    
+    public static void ClearDecoratorFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         foreach(var instance in face.instances) 
             GameObject.DestroyImmediate(instance);
@@ -99,7 +107,7 @@ public static class BoxBrushDecoratorActions
                 break;
         }
 
-        face.normal = -BoxBrushDirections.brushDirLookup[face.direction];
+        face.normal = -BoxBrushDirections.faceDirLookup[face.direction];
         face.tangent = BoxBrushDirections.tangentLookup[face.direction];
         face.bitangent = BoxBrushDirections.bitangentLookup[face.direction];
         face.center = -face.normal * faceDistance;

@@ -60,6 +60,8 @@ public class SubGizmoEditorTool : BaseEditorTool
     
     void InSceneWindow(int windowId)
     {
+        serializedObject.Update();
+        
         var previousWideMode = EditorGUIUtility.wideMode;
         var previousLabelWidth = EditorGUIUtility.labelWidth;
         
@@ -69,6 +71,7 @@ public class SubGizmoEditorTool : BaseEditorTool
         var rect = new Rect(0f, 0f, s_ToolSettingsWindow.width, 50f);
         GUI.DragWindow(rect);
         
+        EditorGUI.BeginChangeCheck();
         using (var checkScope = new EditorGUI.ChangeCheckScope())
         {
             // using(var disabledScope = new EditorGUI.DisabledGroupScope(m_HandleMode == HandleMode.AutoSmooth))
@@ -118,6 +121,12 @@ public class SubGizmoEditorTool : BaseEditorTool
                 Debug.LogWarning("made a change to subGizmo through its tool.");
                 EditorUtility.SetDirty(subGizmoMono);
             }
+        }
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            Debug.LogWarning("... detected change within subGizmo's tool window.");
+            serializedObject.ApplyModifiedProperties();
         }
         
         EditorGUIUtility.wideMode = previousWideMode;

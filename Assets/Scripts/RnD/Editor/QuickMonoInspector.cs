@@ -26,6 +26,11 @@ public class QuickMonoInspector : Editor
         EditorGUILayout.Space(20f);
         EditorGUILayout.LabelField("And now the normal stuff");
         
+        EditorGUILayout.LabelField(
+            "Newlines. \n how do they work?", 
+            GUILayout.Height(EditorGUIUtility.singleLineHeight * 2f) 
+            );
+
         // DrawDefaultInspector();
         
         // EditorGUILayout.PropertyField(quickDataProp);

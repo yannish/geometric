@@ -36,9 +36,12 @@ public class BoxDecoratorCornerSettings
 [Serializable]
 public class BoxDecoratorFaceSettings
 {
+    [Clamp(0f, Mathf.Infinity)]
     public float padding;
+    [Clamp(0f, Mathf.Infinity)]
     public float spacing;
     public bool fill;
+    [Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
     public int instanceCount = 4;
 }
 
@@ -74,9 +77,11 @@ public enum BoxBrushFaceDecoratorOrientation
 [Serializable]
 public class BoxBrushDecoratorFace
 {
+    //... BAKED:
+    public BoxBrushDirection direction;
+    
     //... CONFIGURED:
     public bool isMuted;
-    public BoxBrushDirection direction;
     public BoxBrushFaceDecoratorOrientation orientation;
 
     public bool overrideFill;
@@ -88,11 +93,11 @@ public class BoxBrushDecoratorFace
     public int numInstances;
 
     public bool overridePadding;
-    [ShowIf("overridePadding")]
+    [ShowIf("overridePadding"), Clamp(0f, Mathf.Infinity)]
     public float padding;
     
     public bool overrideSpacing;
-    [ShowIf("overrideSpacing")]
+    [ShowIf("overrideSpacing"), Clamp(0f, Mathf.Infinity)]
     public float spacing;
     
     public float instanceSize; // should be calc'd eventually
@@ -137,6 +142,7 @@ public struct BoxBrushDimensions
     public float depth;
 }
 
+[SelectionBase]
 [RequireComponent(typeof(BoxCollider))]
 public class BoxBrushDecorator : MonoBehaviour
     , ISerializationCallbackReceiver
@@ -156,7 +162,7 @@ public class BoxBrushDecorator : MonoBehaviour
     public BoxBrushDecorationType type;
 
     private BoxCollider _boxCollider;
-    BoxCollider BoxCollider
+    public BoxCollider BoxCollider
     {
         get
         {
@@ -196,7 +202,6 @@ public class BoxBrushDecorator : MonoBehaviour
     public void InitializeCorners()
     {
         cornerStates = new BoxBrushDecoratorCorner[8];
-        var keys = BoxBrushDirections.cornerNormalLookup.Keys;
         int i = 0;
         foreach (var kvp in BoxBrushDirections.cornerNormalLookup)
         {
@@ -208,6 +213,19 @@ public class BoxBrushDecorator : MonoBehaviour
             cornerStates[i].insetPosition = cornerStates[i].position + cornerStates[i].normal * cornerStates[i].insetAmount;
             cornerStates[i].normal = -kvp.Value.FlatInXZ().normalized;
             i++;
+        }
+    }
+
+    [ContextMenu("Initialize Faces")]
+    public void InitializeFaces()
+    {
+        this.ClearFaces();
+        faceStates = new BoxBrushDecoratorFace[6];
+        int i = 0;
+        foreach (var kvp in BoxBrushDirections.faceDirLookup)
+        {
+            faceStates[i] = new BoxBrushDecoratorFace();
+            faceStates[i].direction = kvp.Key;
         }
     }
 

@@ -27,6 +27,19 @@ public class ShowIfPropertyDrawer : PropertyDrawer
         SerializedObject serializedObject = property.serializedObject;
         SerializedProperty conditionProperty = serializedObject.FindProperty(showIf.conditionField);
 
+        // SerializedProperty nestedProperty = serializedObject
+        //     .FindProperty(property.propertyPath)
+        //     .FindPropertyRelative(showIf.conditionField);
+        //
+        // if (nestedProperty != null)
+        // {
+        //     // Debug.LogWarning("found property, it was nested!");
+        // }
+        
+        //... check "nest" here
+        
+        //... check "array" here
+        
         if (conditionProperty != null)
         {
             if (showIf.compareValue == null)

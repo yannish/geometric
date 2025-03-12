@@ -20,6 +20,10 @@ MonoBehaviour:
     UseConstant: 1
     ConstantColor: {r: 0, g: 1, b: 0.08628178, a: 1}
     ColorVariable: {fileID: 0}
+  boxBrushSubHandles:
+    UseConstant: 1
+    ConstantColor: {r: 0.08668178, g: 0.735849, b: 0, a: 1}
+    ColorVariable: {fileID: 0}
   salmon:
     UseConstant: 1
     ConstantColor: {r: 0.9803922, g: 0.5176471, b: 0.46274513, a: 1}

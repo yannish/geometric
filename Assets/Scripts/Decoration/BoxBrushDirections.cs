@@ -14,14 +14,14 @@ public enum BoxBrushDirection
 
 public enum BoxBrushCornerType
 {
-    FRONT_TOP_LEFT = 5,
-    FRONT_TOP_RIGHT = 6,
-    FRONT_BOTTON_LEFT = 7,
-    FRONT_BOTTON_RIGHT = 8,
-    BACK_TOP_LEFT = 9,
-    BACK_TOP_RIGHT = 10,
-    BACK_BOTTOM_LEFT = 11,
-    BACK_BOTTOM_RIGHT = 12,
+    FRONT_TOP_LEFT,
+    FRONT_TOP_RIGHT,
+    FRONT_BOTTOM_LEFT,
+    FRONT_BOTTOM_RIGHT,
+    BACK_TOP_LEFT,
+    BACK_TOP_RIGHT ,
+    BACK_BOTTOM_LEFT ,
+    BACK_BOTTOM_RIGHT
 }
 
 public enum BoxBrushEdge
@@ -42,7 +42,7 @@ public enum BoxBrushEdge
 
 public static class BoxBrushDirections
 {
-    public static Dictionary<BoxBrushDirection, Vector3> brushDirLookup = new Dictionary<BoxBrushDirection, Vector3>()
+    public static Dictionary<BoxBrushDirection, Vector3> faceDirLookup = new Dictionary<BoxBrushDirection, Vector3>()
     {
         { BoxBrushDirection.FORWARD, Vector3.forward },
         { BoxBrushDirection.BACKWARD, Vector3.back },
@@ -80,7 +80,7 @@ public static class BoxBrushDirections
         { BoxBrushCornerType.FRONT_TOP_RIGHT, Vector3.forward + Vector3.up + Vector3.right},
         { BoxBrushCornerType.BACK_BOTTOM_LEFT, Vector3.back + Vector3.down + Vector3.left},
         { BoxBrushCornerType.BACK_BOTTOM_RIGHT, Vector3.back + Vector3.down + Vector3.right},
-        { BoxBrushCornerType.FRONT_BOTTON_LEFT, Vector3.forward + Vector3.down + Vector3.left},
-        { BoxBrushCornerType.FRONT_BOTTON_RIGHT, Vector3.forward + Vector3.down + Vector3.right}
+        { BoxBrushCornerType.FRONT_BOTTOM_LEFT, Vector3.forward + Vector3.down + Vector3.left},
+        { BoxBrushCornerType.FRONT_BOTTOM_RIGHT, Vector3.forward + Vector3.down + Vector3.right}
     };
 }

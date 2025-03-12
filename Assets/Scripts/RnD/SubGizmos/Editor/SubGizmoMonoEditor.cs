@@ -9,7 +9,6 @@ public class SubGizmoMonoEditor : Editor
 {
     Dictionary<int, string> handleLookup = new Dictionary<int, string>();
 
-    public int selectedHandle = -1;
     public SubGizmoCorner? selectedSubgizmoCorner;
     public SubGizmoDirection? selectedSubgizmoFace;
 
@@ -138,6 +137,7 @@ public class SubGizmoMonoEditor : Editor
         }
     }
     
+    public int selectedHandle = -1;
     private void OnSceneGUI()
     {
         var subGizmo = (SubGizmoMono)target;

@@ -21,10 +21,18 @@ public class BoxBrushDecoratorInspector : Editor
     private BoxBrushDecorator decorator;
     private BoxColliderExtendedEditor boxColliderExtendedEditor;
 
-    private int selectedCorner = -1;
+    private int selectedCorner_OLD = -1;
     private bool decoratorDirtied = false;
     private bool changedPrefabAsset;
-
+    private BoxBrushDecorationType prevDecoratorType;
+    
+    //... SELECTION:
+    public BoxBrushDirection? selectedFace;
+    public BoxBrushCornerType? selectedCorner;
+    // public BoxBrushEdge? selectedEdge;
+    
+    private const float k_groupSpacing = 12f;
+    
     
     private void OnEnable()
     {
@@ -71,6 +79,9 @@ public class BoxBrushDecoratorInspector : Editor
     {
         if(boxColliderExtendedEditor != null)
             boxColliderExtendedEditor.OnBoxColliderChanged -= HandleBoxColliderEdit;
+
+        selectedCorner = null;
+        selectedFace = null;
     }
 
     private void HandleBoxColliderEdit()
@@ -79,7 +90,6 @@ public class BoxBrushDecoratorInspector : Editor
         UpdateDirtyDecorator();
     }
     
-    private BoxBrushDecorationType prevDecoratorType;
     
     public override void OnInspectorGUI()
     {
@@ -90,17 +100,35 @@ public class BoxBrushDecoratorInspector : Editor
         serializedObject.Update();
         
         EditorGUI.BeginChangeCheck();
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("CONTROLS:", EditorStyles.boldLabel);
+            if (GUILayout.Button("SNAP LOWER BOUNDS TO PIVOT"))
+            {
+                SnapLowerBoundsToPivot();
+            }
+        }
+        EditorGUILayout.Space(k_groupSpacing);
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("SETTINGS:", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(debugProp);
+            EditorGUILayout.PropertyField(faceSettingsProp);
+            EditorGUILayout.PropertyField(cornerSettingsProp);
+            EditorGUI.indentLevel--;
+        }
+        EditorGUILayout.Space(k_groupSpacing);
         
-        EditorGUILayout.LabelField("SETTINGS:", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(debugProp);
-        EditorGUILayout.PropertyField(faceSettingsProp);
-        EditorGUILayout.PropertyField(cornerSettingsProp);
-        EditorGUILayout.Space(20f);
-        
-        EditorGUILayout.LabelField("CONFIG:", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(typeProp);
-        EditorGUILayout.PropertyField(dimsProp);
-        EditorGUILayout.Space(20f);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("CONFIG:", EditorStyles.boldLabel);  
+            EditorGUILayout.PropertyField(typeProp);
+            EditorGUILayout.PropertyField(dimsProp);
+        }
+        EditorGUILayout.Space(k_groupSpacing);
 
         EditorGUILayout.LabelField("STATES:", EditorStyles.boldLabel);
         prevDecoratorType = decorator.type;
@@ -135,7 +163,17 @@ public class BoxBrushDecoratorInspector : Editor
         }
     }
 
-    void UpdateDirtyDecorator()
+    private void SnapLowerBoundsToPivot()
+    {
+        // if (decorator.BoxCollider == null)
+        //     return;
+        //
+        // var pivotPosLocal = decorator.transform.position
+        // var centerToPivot = decorator.BoxCollider.center.To
+        // decorator.BoxCollider.
+    }
+
+    private void UpdateDirtyDecorator()
     {
         //... CORNERS:
         if (
@@ -170,8 +208,8 @@ public class BoxBrushDecoratorInspector : Editor
             Debug.LogWarning("CLEARING FACES");
             foreach (var face in decorator.faceStates)
             {
-                BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
-                BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
             }
         }
 
@@ -183,12 +221,12 @@ public class BoxBrushDecoratorInspector : Editor
             {
                 if (face.isMuted)
                 {
-                    BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
-                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                    BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
                     continue;
                 }
 
-                bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
             
                 if (
                     instanceCountChange
@@ -196,11 +234,11 @@ public class BoxBrushDecoratorInspector : Editor
                     || face.instances.Count != face.positions.Count
                 )
                 {
-                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
-                    BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.RegeneratePrefabInstances(decorator, face);
                 }
             
-                BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+                BoxBrushDecoratorExtensions.RealignDecoratorFaceInstances(decorator, face);
             }
         }
         
@@ -211,12 +249,12 @@ public class BoxBrushDecoratorInspector : Editor
             {
                 if (face.isMuted)
                 {
-                    BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
-                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
+                    BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
                     continue;
                 }
 
-                bool instanceCountChange = BoxBrushDecoratorActions.RecalculateDecoratorFace(decorator, face);
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
                 
                 if (
                     instanceCountChange
@@ -224,11 +262,11 @@ public class BoxBrushDecoratorInspector : Editor
                     || face.instances.Count != face.positions.Count
                 )
                 {
-                    BoxBrushDecoratorActions.ClearDecoratorFaceInstance(decorator, face);
-                    BoxBrushDecoratorActions.RegeneratePrefabInstances(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.RegeneratePrefabInstances(decorator, face);
                 }
                 
-                BoxBrushDecoratorActions.RealignDecoratorFaceInstances(decorator, face);
+                BoxBrushDecoratorExtensions.RealignDecoratorFaceInstances(decorator, face);
             }
         }
     }
@@ -238,7 +276,8 @@ public class BoxBrushDecoratorInspector : Editor
         TickOnInspectorInput();
         TickSceneViewInput();   
 
-        DrawCornerControls();
+        DrawCornerSelectionControls();
+        // DrawCornerControls();
         DrawFaceControls();
         DrawEdgeControls();
     }
@@ -246,14 +285,108 @@ public class BoxBrushDecoratorInspector : Editor
     
     private void DrawEdgeControls()
     {
-        
+        if (decorator.type != BoxBrushDecorationType.EDGE)
+            return;
     }
 
     private void DrawFaceControls()
     {
+        if (decorator.type != BoxBrushDecorationType.FACE)
+            return;
         
+        foreach (var kvp in BoxBrushDirections.faceDirLookup)
+        {
+            var dir = kvp.Value;
+            var handlePos = Vector3.Scale(dir, decorator.halfDims);
+            
+            var tangent = BoxBrushDirections.tangentLookup[kvp.Key];
+            var bitangent = BoxBrushDirections.bitangentLookup[kvp.Key];
+            var handleRot = Quaternion.LookRotation(-dir, tangent);
+            
+            // var handleRot = Quaternion.LookRotation(dir, Vector3.up);
+            // int controlId = GUIUtility.GetControlID(FocusType.Passive);
+            
+            float effectiveShowSize = selectedFace != null && kvp.Key == selectedFace
+                ? decorator.debug.elementPickSize
+                : decorator.debug.elementSelectedInflation;
+
+            var hotControl = GUIUtility.hotControl;
+            
+            using (new Handles.DrawingScope(
+                       ColorPick.Swatches.boxBrushSubHandles, 
+                       decorator.transform.localToWorldMatrix
+                   ))
+            {
+                if (Handles.Button(
+                        handlePos, 
+                        handleRot,
+                        effectiveShowSize,
+                        decorator.debug.elementPickSize,
+                        Handles.RectangleHandleCap
+                    ))
+                {
+                    Debug.LogWarning($"Selected corner: {kvp.Key}");
+                    
+                    selectedFace = kvp.Key;
+                    selectedCorner = null;
+                    
+                    SceneView.RepaintAll();
+                    Repaint();
+                }
+            }
+
+            if (hotControl != 0)
+            {
+                // Debug.LogWarning("... found a spicy hotcontrol.");
+                SceneView.RepaintAll();
+            }
+        }
     }
 
+    void DrawCornerSelectionControls()
+    {
+        if (decorator.type != BoxBrushDecorationType.CORNER)
+            return;
+        
+        var camForward = SceneView.currentDrawingSceneView.camera.transform.forward;
+        var camUp = SceneView.currentDrawingSceneView.camera.transform.up;
+
+        foreach (var kvp in BoxBrushDirections.cornerNormalLookup)
+        {
+            var dir = kvp.Value;
+            var handlePos = Vector3.Scale(dir, decorator.halfDims);
+            var handleRot = Quaternion.LookRotation(camForward, camUp);
+            // var handleRot = Quaternion.LookRotation(dir, Vector3.up);
+            int controlId = GUIUtility.GetControlID(FocusType.Passive);
+            float effectiveShowSize = selectedCorner != null && kvp.Key == selectedCorner
+                ? decorator.debug.elementPickSize
+                : decorator.debug.elementSelectedInflation;
+
+            using (new Handles.DrawingScope(
+                       ColorPick.Swatches.boxBrushSubHandles, 
+                       decorator.transform.localToWorldMatrix
+                       ))
+            {
+                if (Handles.Button(
+                        handlePos, 
+                        handleRot,
+                        effectiveShowSize,
+                        decorator.debug.elementPickSize,
+                        Handles.RectangleHandleCap
+                    ))
+                {
+                    Debug.LogWarning($"Selected corner: {kvp.Key}");
+                    selectedCorner = kvp.Key;
+                    selectedFace = null;
+                    
+                    SceneView.RepaintAll();
+                    Repaint();
+                }
+            }
+        }
+    }
+    
+    
     
     void DrawCornerControls()
     {
@@ -272,7 +405,7 @@ public class BoxBrushDecoratorInspector : Editor
             int controlId = GUIUtility.GetControlID(FocusType.Passive);
 
             float effectiveHandleSize = decorator.debug.elementSelectionSize;
-            effectiveHandleSize *= (int)kvp.Key == selectedCorner ? decorator.debug.elementSelectedInflation : 1f;
+            effectiveHandleSize *= (int)kvp.Key == selectedCorner_OLD ? decorator.debug.elementSelectedInflation : 1f;
             
             if (Handles.Button(
                     handlePos,
@@ -282,7 +415,7 @@ public class BoxBrushDecoratorInspector : Editor
                     Handles.RectangleHandleCap
                 ))
             {
-                selectedCorner = (int)kvp.Key;
+                selectedCorner_OLD = (int)kvp.Key;
                 SceneView.RepaintAll();
                 Repaint();
             }

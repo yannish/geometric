@@ -175,9 +175,9 @@ MonoBehaviour:
   - quickBool: 0
     quickFloat: 0
     quickString: 
-  - quickBool: 0
-    quickFloat: 0
-    quickString: 
+  - quickBool: 1
+    quickFloat: 1
+    quickString: heewo
   - quickBool: 0
     quickFloat: 0
     quickString: 
