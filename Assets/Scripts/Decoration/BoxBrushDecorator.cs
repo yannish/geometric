@@ -18,14 +18,18 @@ public class BoxBrushDebug
     public float drawAAThickness = 3f;
     public float drawCornerArrowSize = 3f;
 
-    public float drawDottedLineSpacing = 0.2f;
+    public float drawDottedLineSpacing = 4f;
     
     public float elementSelectionSize = 1f;
     public float elementSelectedInflation = 1.2f;
     public float elementPickSize = 2f;
+
+    public float placeholderPrefabSize = 1f;
     
     public Vector3 drawWireCubeSize = Vector3.one;
 }
+
+#region ELEMENT SETTINGS:
 
 [Serializable]
 public class BoxDecoratorCornerSettings
@@ -45,7 +49,7 @@ public class BoxDecoratorEdgeSettings
     [FormerlySerializedAs("edgeAlignmentStyle")]
     public EdgeAlignmentStyle alignmentStyle = EdgeAlignmentStyle.WITH_NORMAL;
     
-    public bool fill;
+    public bool fill = true;
     [Clamp(0f, Mathf.Infinity)]
     public float padding;
     [Clamp(0f, Mathf.Infinity)]
@@ -61,10 +65,12 @@ public class BoxDecoratorFaceSettings
     public float padding;
     [Clamp(0f, Mathf.Infinity)]
     public float spacing;
-    public bool fill;
+    public bool fill = true;
     [Clamp(0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE)]
     public int instanceCount = 4;
 }
+
+#endregion
 
 public enum BoxBrushDecorationType
 {
@@ -80,6 +86,7 @@ public enum BoxBrushFaceDecoratorOrientation
     ALONG_HEIGHT,
 }
 
+#region ELEMENTS:
 [Serializable]
 public class BoxBrushDecoratorFace
 {
@@ -174,14 +181,8 @@ public class BoxBrushDecoratorEdge
     [HideInInspector] public List<Vector3> positions = new List<Vector3>();
     [HideInInspector] public List<GameObject> instances =  new List<GameObject>();
 }
+#endregion
 
-// [Serializable]
-// public struct BoxBrushDimensions
-// {
-//     public float width;
-//     public float height;
-//     public float depth;
-// }
 
 [SelectionBase]
 [RequireComponent(typeof(BoxCollider))]
@@ -340,7 +341,7 @@ public class BoxBrushDecorator : MonoBehaviour
         Handles.matrix = transform.localToWorldMatrix * boxColliderMatrix;
         Gizmos.matrix = transform.localToWorldMatrix * boxColliderMatrix;
 
-        var instanceDrawSize = prefab != null ? calculatedPrefabSize : tempPrefabSize;
+        var instanceDrawSize = prefab != null ? calculatedPrefabSize : debug.placeholderPrefabSize;
         instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
         
         for (int i = 0; i < faceStates.Length; i++)
@@ -372,7 +373,8 @@ public class BoxBrushDecorator : MonoBehaviour
             {
                 foreach (var localPos in face.positions)
                 {
-                    Handles.DrawWireCube(localPos, Vector3.one * instanceDrawSize);
+                    Gizmos.DrawWireSphere(localPos, instanceDrawSize * 0.5f);
+                    // Handles.DrawWireCube(localPos, Vector3.one * instanceDrawSize);
                 }
             }
         }
@@ -451,6 +453,9 @@ public class BoxBrushDecorator : MonoBehaviour
         if (!type.HasFlag(BoxBrushDecorationType.EDGE))
             return;
         
+        var instanceDrawSize = prefab != null ? calculatedPrefabSize : debug.placeholderPrefabSize;
+        instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
+
         var prevHandlesMatrix = Handles.matrix;
         var prevGizmosMatrix = Gizmos.matrix;
         
@@ -511,11 +516,21 @@ public class BoxBrushDecorator : MonoBehaviour
                 continue;
             
             //... draw our final positions:
+            // using (ColorPick.Swatches.boxBrushCenter.ctx)
+            // {
+            //     Handles.DrawWireDisc(edge.center, edge.normal, calculatedPrefabSize);
+            //     // Handles.DrawWireCube(corner.insetPosition, Vector3.one * instanceDrawSize);
+            //     // Handles.DrawDottedLine(corner.position, corner.insetPosition, debug.drawDottedLineSpacing);
+            // }
+            
+            //... draw our final positions:
             using (ColorPick.Swatches.boxBrushCenter.ctx)
             {
-                Handles.DrawWireDisc(edge.center, edge.normal, calculatedPrefabSize);
-                // Handles.DrawWireCube(corner.insetPosition, Vector3.one * instanceDrawSize);
-                // Handles.DrawDottedLine(corner.position, corner.insetPosition, debug.drawDottedLineSpacing);
+                foreach (var localPos in edge.positions)
+                {
+                    Gizmos.DrawWireSphere(localPos, instanceDrawSize * 0.5f);
+                    // Handles.DrawWireCube(localPos, Vector3.one * instanceDrawSize);
+                }
             }
         }
         

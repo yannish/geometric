@@ -66,7 +66,7 @@ public static class BoxBrushDecoratorExtensions
         edge.effectiveSpan = edgeLength - 2f * effectivePadding;
         
         //.. TODO: this should happen elsewhere?
-        decorator.calculatedPrefabSize = -1f;
+        decorator.calculatedPrefabSize = decorator.debug.placeholderPrefabSize;
         if (decorator.prefab != null)
         {
             bool useCollisionCheckInstead = false;
@@ -106,10 +106,13 @@ public static class BoxBrushDecoratorExtensions
             Mathf.FloorToInt((edge.effectiveSpan - effectiveSpacing) / (clampedInstanceSize + effectiveSpacing));
 
         var effectiveFill = edge.overrideFill ? edge.fill : decorator.edgeSettings.fill;
+        
+        var targetInstanceCount = edge.overrideInstanceCount ? edge.numInstances : decorator.edgeSettings.instanceCount;
 
         var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount
-            : Mathf.Clamp(edge.numInstances, 0, maxInstancesBySize) ;
+            : Mathf.Clamp(targetInstanceCount, 0, maxInstancesBySize) ;
+            // : Mathf.Clamp(edge.numInstances, 0, maxInstancesBySize) ;
         
         effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_EDGE);
 
@@ -299,7 +302,7 @@ public static class BoxBrushDecoratorExtensions
         face.effectiveSpan = faceLength - 2f * effectivePadding;
 
         //.. TODO: this should happen elsewhere?
-        decorator.calculatedPrefabSize = -1f;
+        decorator.calculatedPrefabSize = decorator.debug.placeholderPrefabSize;
         if (decorator.prefab != null)
         {
             bool useCollisionCheckInstead = false;
@@ -342,12 +345,14 @@ public static class BoxBrushDecoratorExtensions
         
         var effectiveFill = face.overrideFill ? face.fill : decorator.faceSettings.fill;
         
+        var targetInstanceCount = face.overrideInstanceCount ? face.numInstances : decorator.faceSettings.instanceCount;
+        
         var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount
-            : Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) ;
-        
-        effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE);
+            : Mathf.Clamp(targetInstanceCount, 0, maxInstancesBySize) ;
+            // : Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) ;
 
+        effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE);
         
         var totalInnerPadding = face.effectiveSpan - effectiveNumInstances * clampedInstanceSize;
         var separationPadding = effectiveNumInstances <= 1 
@@ -356,6 +361,12 @@ public static class BoxBrushDecoratorExtensions
         
         face.positions.Clear();
 
+        // Debug.LogWarning($"maxInstanceBySize {maxInstancesBySize}, " +
+        //                  $"preclamped: {preClamped}, " +
+        //                  $"effectiveFull: {effectiveFill}, " +
+        //                  $"filledInstanceCount: {filledInstanceCount}, " +
+        //                  $"final: {effectiveNumInstances}, ");
+        
         if (effectiveNumInstances < 1)
             return prevInstanceCount != face.positions.Count;
 

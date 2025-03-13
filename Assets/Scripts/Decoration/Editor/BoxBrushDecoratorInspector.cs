@@ -362,19 +362,19 @@ public class BoxBrushDecoratorInspector : Editor
                     {
                         foreach (var edge in decorator.edgeStates)
                         {
-                            edge.isMuted =
-                            !(edge.type == BoxBrushEdge.FRONT_LEFT
-                               || edge.type == BoxBrushEdge.FRONT_RIGHT
-                               || edge.type == BoxBrushEdge.BACK_LEFT
-                               || edge.type == BoxBrushEdge.BACK_RIGHT);
+                            edge.isMuted = 
+                                (edge.type == BoxBrushEdge.FRONT_LEFT
+                                 || edge.type == BoxBrushEdge.FRONT_RIGHT
+                                 || edge.type == BoxBrushEdge.BACK_LEFT
+                                 || edge.type == BoxBrushEdge.BACK_RIGHT);
                         }
                     }
                     if (GUILayout.Button("VERTICAL"))
                     {
                         foreach (var edge in decorator.edgeStates)
                         {
-                            edge.isMuted =
-                                (edge.type == BoxBrushEdge.FRONT_LEFT
+                            edge.isMuted = 
+                                !(edge.type == BoxBrushEdge.FRONT_LEFT
                                   || edge.type == BoxBrushEdge.FRONT_RIGHT
                                   || edge.type == BoxBrushEdge.BACK_LEFT
                                   || edge.type == BoxBrushEdge.BACK_RIGHT);
