@@ -179,6 +179,9 @@ public class BoxBrushDecoratorEdge
 public class BoxBrushDecorator : MonoBehaviour
     , ISerializationCallbackReceiver
 {
+    [Clamp(0f, Mathf.Infinity)]
+    public float quickFloat;
+    
     public string decoratorName;
     
     public BoxBrushDebug debug;
@@ -233,6 +236,10 @@ public class BoxBrushDecorator : MonoBehaviour
         
     }
 
+    [HideInInspector, SerializeField] public int selectedFace = -1;
+    [HideInInspector, SerializeField] public int selectedCorner = -1;
+    [HideInInspector, SerializeField] public int selectedEdge = -1;
+    
     [ContextMenu("Initialize Corners")]
     public void InitializeCorners()
     {

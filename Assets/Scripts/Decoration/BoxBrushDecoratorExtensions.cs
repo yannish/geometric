@@ -347,6 +347,10 @@ public static class BoxBrushDecoratorExtensions
 
         if (effectiveNumInstances < 1)
             return prevInstanceCount != face.positions.Count;
+
+        var effectiveSpanDirection = face.orientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH
+            ? face.bitangent
+            : face.tangent;
         
         if (effectiveNumInstances == 1)
         {

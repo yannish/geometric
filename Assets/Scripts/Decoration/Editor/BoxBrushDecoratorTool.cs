@@ -11,6 +11,7 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     
     private BoxBrushDecorator decorator;
     private BoxBrushDecoratorInspector decoratorInspector;
+    private BoxBrushDecoratorToolWindow window;
     
     private SerializedObject serializedObject;
     private SerializedProperty facesProp;
@@ -52,13 +53,21 @@ public class BoxBrushDecoratorTool : BaseEditorTool
                 break;
             }
         }
+        
+        // window = EditorWindow.GetWindow<BoxBrushDecoratorToolWindow>();
     }
 
     public override void OnWillBeDeactivated()
     {
-        
+        // window.Close();
     }
-    
+
+    public void OnDisable()
+    {
+        if(window != null)
+            window.Close();
+    }
+
     public override void DrawHandles()
     {
         Handles.DrawWireDisc(decorator.transform.position, Vector3.up, 2f);

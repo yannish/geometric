@@ -90,6 +90,11 @@ public class BoxBrushDecoratorInspector : Editor
 
         selectedCorner = null;
         selectedFace = null;
+        selectedEdge = null;
+
+        decorator.selectedEdge = -1;
+        decorator.selectedCorner = -1;
+        decorator.selectedFace = -1;
     }
 
     private void HandleBoxColliderEdit()
@@ -615,6 +620,11 @@ public class BoxBrushDecoratorInspector : Editor
                     
                     selectedFace = kvp.Key;
                     selectedCorner = null;
+                    selectedEdge = null;
+                    
+                    decorator.selectedFace = (int)kvp.Key;
+                    decorator.selectedCorner = -1;
+                    decorator.selectedEdge = -1;
                     
                     SceneView.RepaintAll();
                     Repaint();
@@ -664,6 +674,11 @@ public class BoxBrushDecoratorInspector : Editor
                     Debug.LogWarning($"Selected corner: {kvp.Key}");
                     selectedCorner = kvp.Key;
                     selectedFace = null;
+                    selectedEdge = null;
+                    
+                    decorator.selectedFace = -1;
+                    decorator.selectedCorner = (int)kvp.Key;
+                    decorator.selectedEdge = -1;
                     
                     SceneView.RepaintAll();
                     Repaint();
