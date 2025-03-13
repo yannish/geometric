@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEditor.Overlays;
+using UnityEditor.Rendering;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,8 +21,31 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
         //           "  - FACE (ALT + 3)\n\n" +
         //           "\n" +
         //           "Click an element in scene view to edit it.";
+        
+        // SceneView.duringSceneGui += OnSceneGUI;
     }
     
+    public override void OnCreated()
+    {
+        Debug.Log("BoxBrushDecoratorOverlay.OnCreated");
+    }
+
+    public override void OnWillBeDestroyed()
+    {
+        Debug.Log("BoxBrushDecoratorOverlay.OnWillBeDestroyed");
+        
+        // SceneView.duringSceneGui -= OnSceneGUI;
+    }
+
+    private void OnSceneGUI(SceneView obj)
+    {
+        if (!visible || decorator ==null)
+            return;
+        
+        // Debug.LogWarning("dwawrring in da scene from overlay");
+        Handles.DrawSolidDisc(decorator.transform.position, Vector3.up, 3f);
+    }
+
     private BoxBrushDecoratorInspector decoratorInspector;
     private BoxBrushDecorator decorator;
     private SerializedObject serializedObject;
@@ -34,17 +58,6 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
     private Label edgeLabel;
     private Label cornerLabel;
     private Label faceLabel;
-
-    
-    public override void OnCreated()
-    {
-        Debug.Log("BoxBrushDecoratorOverlay.OnCreated");
-    }
-
-    public override void OnWillBeDestroyed()
-    {
-        Debug.Log("BoxBrushDecoratorOverlay.OnWillBeDestroyed");
-    }
 
     public override VisualElement CreatePanelContent()
     {

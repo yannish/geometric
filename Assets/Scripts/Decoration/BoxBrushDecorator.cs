@@ -188,11 +188,6 @@ public class BoxBrushDecoratorEdge
 public class BoxBrushDecorator : MonoBehaviour
     , ISerializationCallbackReceiver
 {
-    [Clamp(0f, Mathf.Infinity)]
-    public float quickFloat;
-    
-    public string decoratorName;
-    
     public BoxBrushDebug debug;
     
     public GameObject prefab;
@@ -200,8 +195,6 @@ public class BoxBrushDecorator : MonoBehaviour
     public float calculatedPrefabSize;
 
     public float tempPrefabSize = 1f;
-    
-    // public BoxBrushDimensions dimensions;
     
     public BoxBrushDecorationType type;
 
@@ -215,26 +208,31 @@ public class BoxBrushDecorator : MonoBehaviour
             return _boxCollider;
         }
     }
+   
+    
+    [HideInInspector, SerializeField] public int selectedFace = -1;
+    [HideInInspector, SerializeField] public int selectedCorner = -1;
+    [HideInInspector, SerializeField] public int selectedEdge = -1;
+
     
     #region PROPERTIES:
     public Vector3 dims => BoxCollider.size;
     public Vector3 halfDims => dims * 0.5f;
-    // public Vector3 dims => new Vector3(dimensions.width, dimensions.height, dimensions.depth);
+    public Vector3 center => BoxCollider.center;
     #endregion
     
-    
-    #region FACES
+    #region FACES:
     public BoxDecoratorFaceSettings faceSettings = new BoxDecoratorFaceSettings();
     public const int MAX_INSTANCES_PER_FACE = 100;
     public BoxBrushDecoratorFace[] faceStates = new BoxBrushDecoratorFace[4];
     #endregion
     
-    #region CORNERS
+    #region CORNERS:
     public BoxDecoratorCornerSettings cornerSettings = new BoxDecoratorCornerSettings();
     public BoxBrushDecoratorCorner[] cornerStates;// = new BoxBrushDecoratorCorner[8];
     #endregion
     
-    #region EDGES
+    #region EDGES:
     public BoxDecoratorEdgeSettings edgeSettings = new BoxDecoratorEdgeSettings();
     public const int MAX_INSTANCES_PER_EDGE = 100;
     public BoxBrushDecoratorEdge[] edgeStates = new BoxBrushDecoratorEdge[12];
@@ -256,11 +254,6 @@ public class BoxBrushDecorator : MonoBehaviour
         this.ClearFaces();
     }
 
-    [HideInInspector, SerializeField] public int selectedFace = -1;
-    [HideInInspector, SerializeField] public int selectedCorner = -1;
-    [HideInInspector, SerializeField] public int selectedEdge = -1;
-    
-    
     [ContextMenu("Initialize Corners")]
     public void InitializeCorners()
     {
@@ -316,16 +309,16 @@ public class BoxBrushDecorator : MonoBehaviour
         if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this))
             return;
         
-        using (ColorPick.Swatches.boxBrushWire.ctx)
-        {
-            var prevHandlesMatrix = Handles.matrix;
-            var prevHandlesDrawTest = Handles.zTest;
-            Handles.zTest = CompareFunction.Less;
-            Handles.matrix = transform.localToWorldMatrix;
-            Handles.DrawWireCube(Vector3.zero, new Vector3(dims.x, dims.y, dims.z));
-            Handles.matrix = prevHandlesMatrix;
-            Handles.zTest = prevHandlesDrawTest;
-        }
+        // using (ColorPick.Swatches.boxBrushWire.ctx)
+        // {
+        //     var prevHandlesMatrix = Handles.matrix;
+        //     var prevHandlesDrawTest = Handles.zTest;
+        //     Handles.zTest = CompareFunction.Less;
+        //     Handles.matrix = transform.localToWorldMatrix;
+        //     Handles.DrawWireCube(Vector3.zero, new Vector3(dims.x, dims.y, dims.z));
+        //     Handles.matrix = prevHandlesMatrix;
+        //     Handles.zTest = prevHandlesDrawTest;
+        // }
         
         DrawCorners();
         DrawEdges();
@@ -341,9 +334,11 @@ public class BoxBrushDecorator : MonoBehaviour
 
         var prevHandlesMatrix = Handles.matrix;
         var prevGizmosMatrix = Gizmos.matrix;
-        
-        Handles.matrix = transform.localToWorldMatrix;
-        Gizmos.matrix = transform.localToWorldMatrix;
+
+        var boxColliderMatrix = Matrix4x4.identity;
+        // var boxColliderMatrix = Matrix4x4.Translate(BoxCollider.center);
+        Handles.matrix = transform.localToWorldMatrix * boxColliderMatrix;
+        Gizmos.matrix = transform.localToWorldMatrix * boxColliderMatrix;
 
         var instanceDrawSize = prefab != null ? calculatedPrefabSize : tempPrefabSize;
         instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
@@ -394,8 +389,10 @@ public class BoxBrushDecorator : MonoBehaviour
         var prevHandlesMatrix = Handles.matrix;
         var prevGizmosMatrix = Gizmos.matrix;
         
-        Handles.matrix = transform.localToWorldMatrix;
-        Gizmos.matrix = transform.localToWorldMatrix;
+        var boxColliderMatrix = Matrix4x4.identity;
+        // var boxColliderMatrix = Matrix4x4.Translate(BoxCollider.center);
+        Handles.matrix = transform.localToWorldMatrix * boxColliderMatrix;
+        Gizmos.matrix = transform.localToWorldMatrix * boxColliderMatrix;
 
         var instanceDrawSize = prefab != null ? calculatedPrefabSize : tempPrefabSize;
         instanceDrawSize = Mathf.Max(0.1f, instanceDrawSize);
@@ -457,8 +454,10 @@ public class BoxBrushDecorator : MonoBehaviour
         var prevHandlesMatrix = Handles.matrix;
         var prevGizmosMatrix = Gizmos.matrix;
         
-        Handles.matrix = transform.localToWorldMatrix;
-        Gizmos.matrix = transform.localToWorldMatrix;
+        var boxColliderMatrix = Matrix4x4.identity;
+        // var boxColliderMatrix = Matrix4x4.Translate(BoxCollider.center);
+        Handles.matrix = transform.localToWorldMatrix * boxColliderMatrix;
+        Gizmos.matrix = transform.localToWorldMatrix * boxColliderMatrix;
 
         for (int i = 0; i < edgeStates.Length; i++)
         {

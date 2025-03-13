@@ -245,6 +245,7 @@ public class BoxBrushDecoratorInspector : Editor
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();
                 UpdateDirtyDecorator();
                 EditorUtility.SetDirty(decorator);
+                SceneView.RepaintAll();
             }
             // EditorGUILayout.PropertyField(dimsProp);
         }
@@ -435,7 +436,7 @@ public class BoxBrushDecoratorInspector : Editor
             Debug.LogWarning("CLEARING FACES");
             foreach (var face in decorator.faceStates)
             {
-                BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
                 BoxBrushDecoratorExtensions.ClearFace(decorator, face);
             }
         }
@@ -447,12 +448,12 @@ public class BoxBrushDecoratorInspector : Editor
             {
                 if (face.isMuted)
                 {
-                    BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
                     BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     continue;
                 }
 
-                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
             
                 if (
                     instanceCountChange
@@ -475,12 +476,12 @@ public class BoxBrushDecoratorInspector : Editor
             {
                 if (face.isMuted)
                 {
-                    BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
                     BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     continue;
                 }
 
-                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
+                bool instanceCountChange = BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
                 
                 if (
                     instanceCountChange
@@ -600,7 +601,7 @@ public class BoxBrushDecoratorInspector : Editor
         foreach (var kvp in BoxBrushDirections.faceDirLookup)
         {
             var dir = kvp.Value;
-            var handlePos = Vector3.Scale(dir, decorator.halfDims);
+            var handlePos = decorator.BoxCollider.center + Vector3.Scale(dir, decorator.halfDims);
             
             var tangent = BoxBrushDirections.tangentLookup[kvp.Key];
             var bitangent = BoxBrushDirections.bitangentLookup[kvp.Key];
@@ -664,7 +665,7 @@ public class BoxBrushDecoratorInspector : Editor
         foreach (var kvp in BoxBrushDirections.cornerNormalLookup)
         {
             var dir = kvp.Value;
-            var handlePos = Vector3.Scale(dir, decorator.halfDims);
+            var handlePos = decorator.BoxCollider.center + Vector3.Scale(dir, decorator.halfDims);
             var handleRot = Quaternion.LookRotation(camForward, camUp);
             // var handleRot = Quaternion.LookRotation(dir, Vector3.up);
             int controlId = GUIUtility.GetControlID(FocusType.Passive);

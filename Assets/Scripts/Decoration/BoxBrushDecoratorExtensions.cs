@@ -58,7 +58,7 @@ public static class BoxBrushDecoratorExtensions
                 break;
         }
         
-        edge.center = Vector3.Scale(decorator.halfDims, BoxBrushDirections.edgeCenterLookup[edge.type]);
+        edge.center = decorator.center + Vector3.Scale(decorator.halfDims, BoxBrushDirections.edgeCenterLookup[edge.type]);
         edge.normal = -BoxBrushDirections.edgeCenterLookup[edge.type].normalized;
         edge.bitangent = BoxBrushDirections.edgeTangentLookup[edge.type];
         
@@ -249,7 +249,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static bool RecalculateDecoratorFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static bool RecalculateFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         bool instanceCountChanged = false;
         int prevInstanceCount = face.positions.Count;
@@ -293,7 +293,7 @@ public static class BoxBrushDecoratorExtensions
         face.normal = -BoxBrushDirections.faceDirLookup[face.direction];
         face.tangent = BoxBrushDirections.tangentLookup[face.direction];
         face.bitangent = BoxBrushDirections.bitangentLookup[face.direction];
-        face.center = -face.normal * faceDistance;
+        face.center = decorator.center - face.normal * faceDistance;
 
         float effectivePadding = face.overridePadding ? face.padding : decorator.faceSettings.padding;
         face.effectiveSpan = faceLength - 2f * effectivePadding;
@@ -419,19 +419,22 @@ public static class BoxBrushDecoratorExtensions
         }
         else
         {
-            if (corner.instance == null)
-                corner.instance = PrefabUtility.InstantiatePrefab(decorator.prefab, decorator.transform) as GameObject;
-            corner.instance.transform.SetLocalPositionAndRotation(
-                corner.insetPosition,
-                Quaternion.LookRotation(corner.normal)
-                );
+            if (decorator.prefab != null)
+            {
+                if (corner.instance == null)
+                    corner.instance = PrefabUtility.InstantiatePrefab(decorator.prefab, decorator.transform) as GameObject;
+                corner.instance.transform.SetLocalPositionAndRotation(
+                    corner.insetPosition,
+                    Quaternion.LookRotation(corner.normal)
+                    );
+            }
         }
     }
 
     private static void RecalculateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
     {
         var cornerDir = BoxBrushDirections.cornerNormalLookup[corner.direction];
-        corner.position = Vector3.Scale(cornerDir, decorator.halfDims);
+        corner.position = decorator.center + Vector3.Scale(cornerDir, decorator.halfDims);
         var effectiveInset = corner.overrideInsetAmount
             ? corner.insetAmount
             : decorator.cornerSettings.insetAmount;
