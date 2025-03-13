@@ -12,16 +12,21 @@ public static class BoxBrushDecoratorExtensions
     {
         foreach (var edge in decorator.edgeStates)
         {
+            if(edge == null)
+                continue;
             ClearEdge(decorator, edge);
         }
     }
 
     public static void ClearEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
-        foreach(var instance in edge.instances)
-            GameObject.DestroyImmediate(instance);
-        
-        edge.instances.Clear();
+        if (edge.instances != null)
+        {
+            foreach(var instance in edge.instances)
+                GameObject.DestroyImmediate(instance);
+            
+            edge.instances.Clear();
+        }
     }
 
     public static bool RecalculateEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
@@ -142,16 +147,21 @@ public static class BoxBrushDecoratorExtensions
     {
         foreach (var face in decorator.faceStates)
         {
-            ClearDecoratorFace(decorator, face);
+            if(face == null)
+                continue;
+            ClearFace(decorator, face);
         }
     }
     
-    public static void ClearDecoratorFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static void ClearFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
-        foreach(var instance in face.instances) 
-            GameObject.DestroyImmediate(instance);
+        if (face.instances != null)
+        {
+            foreach(var instance in face.instances) 
+                GameObject.DestroyImmediate(instance);
 
-        face.instances.Clear();
+            face.instances.Clear();
+        }
     }
     
     public static void RealignDecoratorFaceInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)

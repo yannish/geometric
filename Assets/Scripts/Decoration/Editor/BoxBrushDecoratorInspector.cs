@@ -95,6 +95,14 @@ public class BoxBrushDecoratorInspector : Editor
         decorator.selectedEdge = -1;
         decorator.selectedCorner = -1;
         decorator.selectedFace = -1;
+
+        if (target == null)
+        {
+            Debug.LogWarning("deleted component!");
+            decorator.ClearEdges();
+            decorator.ClearCorners();
+            decorator.ClearFaces();
+        }
     }
 
     private void HandleBoxColliderEdit()
@@ -428,7 +436,7 @@ public class BoxBrushDecoratorInspector : Editor
             foreach (var face in decorator.faceStates)
             {
                 BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
-                BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                BoxBrushDecoratorExtensions.ClearFace(decorator, face);
             }
         }
         
@@ -440,7 +448,7 @@ public class BoxBrushDecoratorInspector : Editor
                 if (face.isMuted)
                 {
                     BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
-                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     continue;
                 }
 
@@ -452,7 +460,7 @@ public class BoxBrushDecoratorInspector : Editor
                     || face.instances.Count != face.positions.Count
                 )
                 {
-                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     BoxBrushDecoratorExtensions.RegenerateFaceInstances(decorator, face);
                 }
             
@@ -468,7 +476,7 @@ public class BoxBrushDecoratorInspector : Editor
                 if (face.isMuted)
                 {
                     BoxBrushDecoratorExtensions.RecalculateDecoratorFace(decorator, face);
-                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     continue;
                 }
 
@@ -480,7 +488,7 @@ public class BoxBrushDecoratorInspector : Editor
                     || face.instances.Count != face.positions.Count
                 )
                 {
-                    BoxBrushDecoratorExtensions.ClearDecoratorFace(decorator, face);
+                    BoxBrushDecoratorExtensions.ClearFace(decorator, face);
                     BoxBrushDecoratorExtensions.RegenerateFaceInstances(decorator, face);
                 }
                 
@@ -563,8 +571,12 @@ public class BoxBrushDecoratorInspector : Editor
     }
     
     
+    
     public void OnSceneGUI()
     {
+        if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(target))
+            return;
+        
         TickOnInspectorInput();
         TickSceneViewInput();   
 

@@ -224,30 +224,42 @@ public class BoxBrushDecorator : MonoBehaviour
     
     
     #region FACES
-    public BoxDecoratorFaceSettings faceSettings;
+    public BoxDecoratorFaceSettings faceSettings = new BoxDecoratorFaceSettings();
     public const int MAX_INSTANCES_PER_FACE = 100;
     public BoxBrushDecoratorFace[] faceStates = new BoxBrushDecoratorFace[4];
     #endregion
     
     #region CORNERS
-    public BoxDecoratorCornerSettings cornerSettings;
+    public BoxDecoratorCornerSettings cornerSettings = new BoxDecoratorCornerSettings();
     public BoxBrushDecoratorCorner[] cornerStates;// = new BoxBrushDecoratorCorner[8];
     #endregion
     
     #region EDGES
-    public BoxDecoratorEdgeSettings edgeSettings;
+    public BoxDecoratorEdgeSettings edgeSettings = new BoxDecoratorEdgeSettings();
     public const int MAX_INSTANCES_PER_EDGE = 100;
     public BoxBrushDecoratorEdge[] edgeStates = new BoxBrushDecoratorEdge[12];
     #endregion
 
     private void Reset()
     {
-        
+        Debug.LogWarning($"Reset decorator: {type}");
+        InitializeCorners();
+        InitializeEdges();
+        InitializeFaces();
+    }
+
+    private void OnDestroy()
+    {
+        Debug.LogWarning("Destroying BoxBrushDecorator");
+        this.ClearEdges();
+        this.ClearCorners();
+        this.ClearFaces();
     }
 
     [HideInInspector, SerializeField] public int selectedFace = -1;
     [HideInInspector, SerializeField] public int selectedCorner = -1;
     [HideInInspector, SerializeField] public int selectedEdge = -1;
+    
     
     [ContextMenu("Initialize Corners")]
     public void InitializeCorners()
@@ -301,6 +313,9 @@ public class BoxBrushDecorator : MonoBehaviour
     void OnDrawGizmos()
     {
 #if UNITY_EDITOR
+        if (!UnityEditorInternal.InternalEditorUtility.GetIsInspectorExpanded(this))
+            return;
+        
         using (ColorPick.Swatches.boxBrushWire.ctx)
         {
             var prevHandlesMatrix = Handles.matrix;
