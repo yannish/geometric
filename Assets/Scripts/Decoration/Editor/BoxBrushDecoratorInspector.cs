@@ -170,7 +170,7 @@ public class BoxBrushDecoratorInspector : Editor
         
         if (EditorGUI.EndChangeCheck())
         {
-            Debug.Log("something changed in brush inspector.");
+            // Debug.Log("something changed in brush inspector.");
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             UpdateDirtyDecorator();
             EditorUtility.SetDirty(decorator);
@@ -626,6 +626,8 @@ public class BoxBrushDecoratorInspector : Editor
                     decorator.selectedCorner = -1;
                     decorator.selectedEdge = -1;
                     
+                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
+                    
                     SceneView.RepaintAll();
                     Repaint();
                 }
@@ -679,6 +681,8 @@ public class BoxBrushDecoratorInspector : Editor
                     decorator.selectedFace = -1;
                     decorator.selectedCorner = (int)kvp.Key;
                     decorator.selectedEdge = -1;
+                    
+                    serializedObject.ApplyModifiedPropertiesWithoutUndo();
                     
                     SceneView.RepaintAll();
                     Repaint();

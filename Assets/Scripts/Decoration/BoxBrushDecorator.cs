@@ -36,6 +36,15 @@ public class BoxDecoratorCornerSettings
 [Serializable]
 public class BoxDecoratorEdgeSettings
 {
+    public enum EdgeAlignmentStyle
+    {
+        WITH_NORMAL,
+        UP
+    }
+    
+    [FormerlySerializedAs("edgeAlignmentStyle")]
+    public EdgeAlignmentStyle alignmentStyle = EdgeAlignmentStyle.WITH_NORMAL;
+    
     public bool fill;
     [Clamp(0f, Mathf.Infinity)]
     public float padding;

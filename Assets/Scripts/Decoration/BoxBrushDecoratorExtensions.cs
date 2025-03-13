@@ -193,10 +193,11 @@ public static class BoxBrushDecoratorExtensions
                 return;
             }
 
-            instance.transform.SetLocalPositionAndRotation(
-                edge.positions[i], 
-                Quaternion.LookRotation(edge.normal, Vector3.Cross(edge.normal, edge.tangent))
-            );
+            var effectiveRot = decorator.edgeSettings.alignmentStyle == BoxDecoratorEdgeSettings.EdgeAlignmentStyle.WITH_NORMAL
+                ? Quaternion.LookRotation(edge.normal, Vector3.Cross(edge.normal, edge.tangent))
+                : Quaternion.LookRotation(edge.normal.FlatInXZ());
+            
+            instance.transform.SetLocalPositionAndRotation(edge.positions[i], effectiveRot);
         }
     }
 
@@ -358,12 +359,12 @@ public static class BoxBrushDecoratorExtensions
         }
         else
         {
-            Vector3 startSpan = face.center - (face.effectiveSpan - clampedInstanceSize) * 0.5f * face.bitangent;
+            Vector3 startSpan = face.center - (face.effectiveSpan - clampedInstanceSize) * 0.5f * effectiveSpanDirection;
             face.positions.Add(startSpan);
             for (int i = 1; i < effectiveNumInstances; i++)
             {
                 var spanStep = i * (separationPadding + clampedInstanceSize);
-                face.positions.Add(startSpan + spanStep * face.bitangent);
+                face.positions.Add(startSpan + spanStep * effectiveSpanDirection);
             }
         }
 

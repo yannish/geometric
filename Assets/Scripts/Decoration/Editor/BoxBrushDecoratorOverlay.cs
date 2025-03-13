@@ -29,10 +29,23 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
     private SerializedProperty typeProp;
     private SerializedProperty quickFloatProp;
 
+    private SerializedProperty selectedFaceProp;
+
     private Label edgeLabel;
     private Label cornerLabel;
     private Label faceLabel;
+
     
+    public override void OnCreated()
+    {
+        Debug.Log("BoxBrushDecoratorOverlay.OnCreated");
+    }
+
+    public override void OnWillBeDestroyed()
+    {
+        Debug.Log("BoxBrushDecoratorOverlay.OnWillBeDestroyed");
+    }
+
     public override VisualElement CreatePanelContent()
     {
         Debug.Log("BoxBrushDecoratorOverlay.CreatePanelContent");
@@ -49,6 +62,7 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
                 serializedObject = new SerializedObject(editor.target);
                 typeProp = serializedObject.FindProperty("type");
                 quickFloatProp = serializedObject.FindProperty("quickFloat");
+                selectedFaceProp = serializedObject.FindProperty("selectedFace");
                 break;
             }
         }
@@ -86,6 +100,13 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
         
         PropertyField quickFloatField = new PropertyField(quickFloatProp);
         quickFloatField.Bind(serializedObject);
+        
+        PropertyField selectedFaceField = new PropertyField(selectedFaceProp);
+        selectedFaceField.Bind(serializedObject);
+        selectedFaceField.RegisterValueChangeCallback(evt =>
+        {
+            Debug.LogWarning($"selected face is now : {selectedFaceProp.intValue}");
+        });
         
         root.Add(positionField);
         root.Add(quickFloatField);
