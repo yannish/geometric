@@ -72,15 +72,11 @@ public abstract class BaseEditorTool : EditorTool
 
     public override void OnToolGUI(EditorWindow window)
     {
-        // Override Editor HotControls to capture cursor
         if (Event.current.type == EventType.Layout)
         {
             HandleUtility.AddDefaultControl(0);
         }
 
-        // Draw the Brush gizmo
-        // bool isEraser = Event.current.modifiers == EventModifiers.Shift;
-        // var handleColor = isEraser ? Color.black : Color.white;
         using (new Handles.DrawingScope(Color.white))
         {
             DrawHandles();

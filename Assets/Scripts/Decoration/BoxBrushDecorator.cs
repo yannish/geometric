@@ -241,7 +241,7 @@ public class BoxBrushDecorator : MonoBehaviour
 
     private void Reset()
     {
-        Debug.LogWarning($"Reset decorator: {type}");
+        // Debug.LogWarning($"Reset decorator: {type}");
         InitializeCorners();
         InitializeEdges();
         InitializeFaces();
@@ -249,7 +249,7 @@ public class BoxBrushDecorator : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.LogWarning("Destroying BoxBrushDecorator");
+        // Debug.LogWarning("Destroying BoxBrushDecorator");
         this.ClearEdges();
         this.ClearCorners();
         this.ClearFaces();

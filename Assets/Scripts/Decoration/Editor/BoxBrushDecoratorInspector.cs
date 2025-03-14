@@ -52,7 +52,6 @@ public class BoxBrushDecoratorInspector : Editor
         faceSettingsProp = serializedObject.FindProperty("faceSettings");
         cornerSettingsProp = serializedObject.FindProperty("cornerSettings");
         edgeSettingsProp = serializedObject.FindProperty("edgeSettings");
-        // dimsProp = serializedObject.FindProperty("dimensions");
         
         debugProp = serializedObject.FindProperty("debug");
         prefabProp = serializedObject.FindProperty("prefab");
@@ -65,7 +64,7 @@ public class BoxBrushDecoratorInspector : Editor
             if (editor.target is BoxCollider)
             {
                 // TODO: .. destroy / shut this down as well...?
-                Debug.LogWarning("Found boxColliderExtendedEditor");
+                // Debug.LogWarning("Found boxColliderExtendedEditor");
                 boxColliderExtendedEditor = editor as BoxColliderExtendedEditor;
                 boxColliderExtendedEditor.OnBoxColliderChanged -= HandleBoxColliderEdit;
                 boxColliderExtendedEditor.OnBoxColliderChanged += HandleBoxColliderEdit;
@@ -98,7 +97,7 @@ public class BoxBrushDecoratorInspector : Editor
 
         if (target == null)
         {
-            Debug.LogWarning("deleted component!");
+            // Debug.LogWarning("deleted component!");
             decorator.ClearEdges();
             decorator.ClearCorners();
             decorator.ClearFaces();
@@ -107,7 +106,7 @@ public class BoxBrushDecoratorInspector : Editor
 
     private void HandleBoxColliderEdit()
     {
-        Debug.LogWarning("box collider was edited, reacting");
+        // Debug.LogWarning("box collider was edited, reacting");
         UpdateDirtyDecorator();
     }
 
@@ -208,7 +207,7 @@ public class BoxBrushDecoratorInspector : Editor
             EditorGUILayout.PropertyField(prefabProp);
             if (EditorGUI.EndChangeCheck())
             {
-                Debug.LogWarning("Changed prefab asset.");
+                // Debug.LogWarning("Changed prefab asset.");
                 changedPrefabAsset = true;
             }
 
@@ -241,7 +240,7 @@ public class BoxBrushDecoratorInspector : Editor
             }
             if (EditorGUI.EndChangeCheck())
             {
-                Debug.Log("something changed in RADIO BUTTONS");
+                // Debug.Log("something changed in RADIO BUTTONS");
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();
                 UpdateDirtyDecorator();
                 EditorUtility.SetDirty(decorator);
@@ -388,16 +387,45 @@ public class BoxBrushDecoratorInspector : Editor
     
     public void UpdateDirtyDecorator()
     {
+        RecalculatePrefabSize();
         UpdateCorners();
         UpdateEdges();
         UpdateFaces();
-        
-        
-
-
-        
     }
 
+    void RecalculatePrefabSize()
+    {
+        decorator.calculatedPrefabSize = decorator.debug.placeholderPrefabSize;
+        if (decorator.prefab != null)
+        {
+            // bool useCollisionCheckInstead = false;
+            // if (useCollisionCheckInstead)
+            // {
+            //     var prefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab) as GameObject;
+            //     var calculatedBounds = new Bounds(prefabInstance.transform.position, Vector3.zero);
+            //     var colliders = prefabInstance.GetComponentsInChildren<Collider>();
+            //     foreach (var col in colliders)
+            //     {
+            //         calculatedBounds.Encapsulate(col.bounds);
+            //     }
+            //     GameObject.DestroyImmediate(prefabInstance);
+            //     
+            //     decorator.calculatedPrefabSize = calculatedBounds.size.x;
+            // }
+            // else
+            // {
+                var calculatedBounds = new Bounds(decorator.prefab.transform.position, Vector3.zero);
+                var meshRenderers = decorator.prefab.GetComponentsInChildren<MeshRenderer>();
+                foreach (var meshRenderer in meshRenderers)
+                {
+                    calculatedBounds.Encapsulate(meshRenderer.bounds);
+                }
+        
+                decorator.calculatedPrefabSize = calculatedBounds.size.x;
+            // }
+        }
+    }
+    
     void UpdateCorners()
     {
         //... CORNERS:
@@ -406,7 +434,7 @@ public class BoxBrushDecoratorInspector : Editor
             || (prevDecoratorType == BoxBrushDecorationType.CORNER && decorator.type != BoxBrushDecorationType.CORNER)
         )
         {
-            Debug.LogWarning("CLEARING CORNERS!");
+            // Debug.LogWarning("CLEARING CORNERS!");
             decorator.RecalculateCorners();
             decorator.ClearCorners();
         }
@@ -419,7 +447,7 @@ public class BoxBrushDecoratorInspector : Editor
         
         if (decorator.type == BoxBrushDecorationType.CORNER)
         {
-            Debug.LogWarning("Updating corners.");
+            // Debug.LogWarning("Updating corners.");
             decorator.RecalculateCorners();
             decorator.UpdateCorners();
         }
@@ -433,7 +461,7 @@ public class BoxBrushDecoratorInspector : Editor
             || (prevDecoratorType == BoxBrushDecorationType.FACE && decorator.type != BoxBrushDecorationType.FACE)
         )
         {
-            Debug.LogWarning("CLEARING FACES");
+            // Debug.LogWarning("CLEARING FACES");
             foreach (var face in decorator.faceStates)
             {
                 BoxBrushDecoratorExtensions.RecalculateFace(decorator, face);
@@ -506,7 +534,7 @@ public class BoxBrushDecoratorInspector : Editor
             || (prevDecoratorType == BoxBrushDecorationType.EDGE && decorator.type != BoxBrushDecorationType.EDGE)
         )
         {
-            Debug.LogWarning("CLEARING EDGES");
+            // Debug.LogWarning("CLEARING EDGES");
             foreach (var edge in decorator.edgeStates)
             {
                 BoxBrushDecoratorExtensions.RecalculateEdge(decorator, edge);
@@ -629,7 +657,7 @@ public class BoxBrushDecoratorInspector : Editor
                         Handles.RectangleHandleCap
                     ))
                 {
-                    Debug.LogWarning($"Selected corner: {kvp.Key}");
+                    // Debug.LogWarning($"Selected corner: {kvp.Key}");
                     
                     selectedFace = kvp.Key;
                     selectedCorner = null;
@@ -686,7 +714,7 @@ public class BoxBrushDecoratorInspector : Editor
                         Handles.RectangleHandleCap
                     ))
                 {
-                    Debug.LogWarning($"Selected corner: {kvp.Key}");
+                    // Debug.LogWarning($"Selected corner: {kvp.Key}");
                     selectedCorner = kvp.Key;
                     selectedFace = null;
                     selectedEdge = null;
@@ -748,7 +776,7 @@ public class BoxBrushDecoratorInspector : Editor
             && e.keyCode == KeyCode.Keypad1 || (e.keyCode == KeyCode.Alpha1 && e.modifiers == EventModifiers.Alt)
             )// && e.modifiers == EventModifiers.Shift)
         {
-            Debug.LogWarning("Pressed 1 key!");
+            // Debug.LogWarning("Pressed 1 key!");
             decorator.type = BoxBrushDecorationType.CORNER;
             decoratorDirtied = true;
             e.Use();
@@ -759,7 +787,7 @@ public class BoxBrushDecoratorInspector : Editor
             && e.keyCode == KeyCode.Keypad2 || (e.keyCode == KeyCode.Alpha2 && e.modifiers == EventModifiers.Alt)
             )
         {
-            Debug.LogWarning("Pressed 2 key!");
+            // Debug.LogWarning("Pressed 2 key!");
             decorator.type = BoxBrushDecorationType.EDGE;
             decoratorDirtied = true;
             e.Use();
@@ -770,7 +798,7 @@ public class BoxBrushDecoratorInspector : Editor
             && e.keyCode == KeyCode.Keypad3 || (e.keyCode == KeyCode.Alpha3 && e.modifiers == EventModifiers.Alt)
             )
         {
-            Debug.LogWarning("Pressed 3 key!");
+            // Debug.LogWarning("Pressed 3 key!");
             decorator.type = BoxBrushDecorationType.FACE;
             decoratorDirtied = true;
             e.Use();
@@ -789,7 +817,7 @@ public class BoxBrushDecoratorInspector : Editor
         Event e = Event.current;
         if (e.type == EventType.KeyDown && e.keyCode == KeyCode.M)
         {
-            Debug.LogWarning("M KEYPRESS!");
+            // Debug.LogWarning("M KEYPRESS!");
             e.Use();
         }
     }

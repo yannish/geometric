@@ -34,7 +34,7 @@ public class BoxBrushDecoratorTool : BaseEditorTool
 
     public override void OnActivated()
     {
-        Debug.LogWarning("Decorator Tool activated");
+        // Debug.LogWarning("Decorator Tool activated");
         decorator = target as BoxBrushDecorator;
         serializedObject = new SerializedObject(decorator);
         
@@ -48,7 +48,7 @@ public class BoxBrushDecoratorTool : BaseEditorTool
         {
             if (editor.target is BoxBrushDecorator)
             {
-                Debug.LogWarning("Found decorator inspector.");
+                // Debug.LogWarning("Found decorator inspector.");
                 decoratorInspector = editor as BoxBrushDecoratorInspector;
                 break;
             }
@@ -163,7 +163,7 @@ public class BoxBrushDecoratorTool : BaseEditorTool
 
             if (checkScope.changed)
             {
-                Debug.LogWarning("made a change to a decorator element through its tool.");
+                // Debug.LogWarning("made a change to a decorator element through its tool.");
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();
                 decoratorInspector.UpdateDirtyDecorator();
                 EditorUtility.SetDirty(decorator);
@@ -258,7 +258,7 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     [Shortcut("Decorator Tool", null, KeyCode.E, ShortcutModifiers.Alt)]
     static void ToolShortcut()
     {
-        Debug.LogWarning("Decorator Tool shortcut");
+        // Debug.LogWarning("Decorator Tool shortcut");
         if(Selection.GetFiltered<BoxBrushDecorator>(SelectionMode.TopLevel).Length > 0)
             ToolManager.SetActiveTool<BoxBrushDecoratorTool>();
     }

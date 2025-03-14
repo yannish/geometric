@@ -18,7 +18,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
 
-    public static void ClearEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    public static void ClearEdge(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
         if (edge.instances != null)
         {
@@ -29,7 +29,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
 
-    public static bool RecalculateEdge(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    public static bool RecalculateEdge(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
         bool instanceCountChanged = false;
         int prevInstanceCount = edge.positions.Count;
@@ -65,36 +65,6 @@ public static class BoxBrushDecoratorExtensions
         float effectivePadding = edge.overridePadding ? edge.padding : decorator.edgeSettings.padding;
         edge.effectiveSpan = edgeLength - 2f * effectivePadding;
         
-        //.. TODO: this should happen elsewhere?
-        decorator.calculatedPrefabSize = decorator.debug.placeholderPrefabSize;
-        if (decorator.prefab != null)
-        {
-            bool useCollisionCheckInstead = false;
-            if (useCollisionCheckInstead)
-            {
-                var prefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab) as GameObject;
-                var calculatedBounds = new Bounds(prefabInstance.transform.position, Vector3.zero);
-                var colliders = prefabInstance.GetComponentsInChildren<Collider>();
-                foreach (var col in colliders)
-                {
-                    calculatedBounds.Encapsulate(col.bounds);
-                }
-                GameObject.DestroyImmediate(prefabInstance);
-                
-                decorator.calculatedPrefabSize = calculatedBounds.size.x;
-            }
-            else
-            {
-                var calculatedBounds = new Bounds(decorator.prefab.transform.position, Vector3.zero);
-                var meshRenderers = decorator.prefab.GetComponentsInChildren<MeshRenderer>();
-                foreach (var meshRenderer in meshRenderers)
-                {
-                    calculatedBounds.Encapsulate(meshRenderer.bounds);
-                }
-        
-                decorator.calculatedPrefabSize = calculatedBounds.size.x;
-            }
-        }
         
         float clampedInstanceSize = Mathf.Max(0.1f, decorator.calculatedPrefabSize);
         
@@ -112,7 +82,6 @@ public static class BoxBrushDecoratorExtensions
         var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount
             : Mathf.Clamp(targetInstanceCount, 0, maxInstancesBySize) ;
-            // : Mathf.Clamp(edge.numInstances, 0, maxInstancesBySize) ;
         
         effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_EDGE);
 
@@ -156,7 +125,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static void ClearFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static void ClearFace(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         if (face.instances != null)
         {
@@ -167,7 +136,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static void RealignDecoratorFaceInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static void RealignDecoratorFaceInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         if (face.positions.Count != face.instances.Count)
             return;
@@ -190,7 +159,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static void RealignEdgeInstances(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    public static void RealignEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
         if (edge.positions.Count != edge.instances.Count)
             return;
@@ -214,7 +183,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
 
-    public static void RegenerateFaceInstances(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static void RegenerateFaceInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         // Debug.LogWarning("Reinstantiating prefabs!");
         
@@ -233,7 +202,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static void RegenerateEdgeInstances(BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    public static void RegenerateEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
     {
         // Debug.LogWarning("Reinstantiating prefabs!");
         
@@ -252,7 +221,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static bool RecalculateFace(BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
+    public static bool RecalculateFace(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         bool instanceCountChanged = false;
         int prevInstanceCount = face.positions.Count;
@@ -301,43 +270,10 @@ public static class BoxBrushDecoratorExtensions
         float effectivePadding = face.overridePadding ? face.padding : decorator.faceSettings.padding;
         face.effectiveSpan = faceLength - 2f * effectivePadding;
 
-        //.. TODO: this should happen elsewhere?
-        decorator.calculatedPrefabSize = decorator.debug.placeholderPrefabSize;
-        if (decorator.prefab != null)
-        {
-            bool useCollisionCheckInstead = false;
-            if (useCollisionCheckInstead)
-            {
-                var prefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab) as GameObject;
-                var calculatedBounds = new Bounds(prefabInstance.transform.position, Vector3.zero);
-                var colliders = prefabInstance.GetComponentsInChildren<Collider>();
-                foreach (var col in colliders)
-                {
-                    calculatedBounds.Encapsulate(col.bounds);
-                }
-                GameObject.DestroyImmediate(prefabInstance);
-                
-                decorator.calculatedPrefabSize = calculatedBounds.size.x;
-            }
-            else
-            {
-                var calculatedBounds = new Bounds(decorator.prefab.transform.position, Vector3.zero);
-                var meshRenderers = decorator.prefab.GetComponentsInChildren<MeshRenderer>();
-                foreach (var meshRenderer in meshRenderers)
-                {
-                    calculatedBounds.Encapsulate(meshRenderer.bounds);
-                }
-        
-                decorator.calculatedPrefabSize = calculatedBounds.size.x;
-            }
-        }
-
         float clampedInstanceSize = Mathf.Max(0.1f, decorator.calculatedPrefabSize);
         
         int maxInstancesBySize = Mathf.FloorToInt(face.effectiveSpan / clampedInstanceSize);
         
-        // Debug.LogWarning($"maxInstancesBySize: {maxInstancesBySize}");
-
         float effectiveSpacing = face.overrideSpacing ? face.spacing : decorator.faceSettings.spacing;
         
         int filledInstanceCount =
@@ -350,7 +286,6 @@ public static class BoxBrushDecoratorExtensions
         var effectiveNumInstances = effectiveFill 
             ? filledInstanceCount
             : Mathf.Clamp(targetInstanceCount, 0, maxInstancesBySize) ;
-            // : Mathf.Clamp(face.numInstances, 0, maxInstancesBySize) ;
 
         effectiveNumInstances = Mathf.Clamp(effectiveNumInstances, 0, BoxBrushDecorator.MAX_INSTANCES_PER_FACE);
         
@@ -360,12 +295,6 @@ public static class BoxBrushDecoratorExtensions
             : totalInnerPadding / (effectiveNumInstances - 1);
         
         face.positions.Clear();
-
-        // Debug.LogWarning($"maxInstanceBySize {maxInstancesBySize}, " +
-        //                  $"preclamped: {preClamped}, " +
-        //                  $"effectiveFull: {effectiveFill}, " +
-        //                  $"filledInstanceCount: {filledInstanceCount}, " +
-        //                  $"final: {effectiveNumInstances}, ");
         
         if (effectiveNumInstances < 1)
             return prevInstanceCount != face.positions.Count;
@@ -390,8 +319,6 @@ public static class BoxBrushDecoratorExtensions
         }
 
         instanceCountChanged = prevInstanceCount != face.positions.Count;
-        
-        // Debug.LogWarning($"pos count: {face.positions.Count}");
         
         return instanceCountChanged;
     }
@@ -421,7 +348,7 @@ public static class BoxBrushDecoratorExtensions
         }
     }
 
-    private static void UpdateCorner(BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
+    private static void UpdateCorner(this BoxBrushDecorator decorator, BoxBrushDecoratorCorner corner)
     {
         if (corner.isMuted)
         {
