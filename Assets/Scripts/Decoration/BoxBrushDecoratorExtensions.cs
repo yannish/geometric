@@ -115,6 +115,50 @@ public static class BoxBrushDecoratorExtensions
         return instanceCountChanged;
     }
     
+    public static void RegenerateEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    {
+        // Debug.LogWarning("Reinstantiating prefabs!");
+        
+        foreach(var instance in edge.instances) 
+            GameObject.DestroyImmediate(instance);
+
+        edge.instances.Clear();
+        
+        if (decorator.prefab == null)
+            return;
+        
+        for (int i = 0; i < edge.positions.Count; i++)
+        {
+            var newPrefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab, decorator.transform) as GameObject;
+            edge.instances.Add(newPrefabInstance);
+        }
+    }
+    
+    public static void RealignEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
+    {
+        if (edge.positions.Count != edge.instances.Count)
+            return;
+        
+        // Debug.LogWarning($"realigning decorator instances, posCount {face.positions.Count}, {face.instances.Count} ");
+        
+        for (int i = 0; i < edge.positions.Count; i++)
+        {
+            var instance = edge.instances[i];
+            if (instance == null)
+            {
+                Debug.LogWarning("instance of decorator prefab was null!", decorator.gameObject);
+                return;
+            }
+
+            var effectiveRot = decorator.edgeSettings.alignmentStyle == BoxDecoratorEdgeSettings.EdgeAlignmentStyle.WITH_NORMAL
+                ? Quaternion.LookRotation(edge.normal, Vector3.Cross(edge.normal, edge.tangent))
+                : Quaternion.LookRotation(edge.normal.FlatInXZ());
+            
+            instance.transform.SetLocalPositionAndRotation(edge.positions[i], effectiveRot);
+        }
+    }
+
+    
     public static void ClearFaces(this BoxBrushDecorator decorator)
     {
         foreach (var face in decorator.faceStates)
@@ -158,30 +202,6 @@ public static class BoxBrushDecoratorExtensions
                 );
         }
     }
-    
-    public static void RealignEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
-    {
-        if (edge.positions.Count != edge.instances.Count)
-            return;
-        
-        // Debug.LogWarning($"realigning decorator instances, posCount {face.positions.Count}, {face.instances.Count} ");
-        
-        for (int i = 0; i < edge.positions.Count; i++)
-        {
-            var instance = edge.instances[i];
-            if (instance == null)
-            {
-                Debug.LogWarning("instance of decorator prefab was null!", decorator.gameObject);
-                return;
-            }
-
-            var effectiveRot = decorator.edgeSettings.alignmentStyle == BoxDecoratorEdgeSettings.EdgeAlignmentStyle.WITH_NORMAL
-                ? Quaternion.LookRotation(edge.normal, Vector3.Cross(edge.normal, edge.tangent))
-                : Quaternion.LookRotation(edge.normal.FlatInXZ());
-            
-            instance.transform.SetLocalPositionAndRotation(edge.positions[i], effectiveRot);
-        }
-    }
 
     public static void RegenerateFaceInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
@@ -202,32 +222,15 @@ public static class BoxBrushDecoratorExtensions
         }
     }
     
-    public static void RegenerateEdgeInstances(this BoxBrushDecorator decorator, BoxBrushDecoratorEdge edge)
-    {
-        // Debug.LogWarning("Reinstantiating prefabs!");
-        
-        foreach(var instance in edge.instances) 
-            GameObject.DestroyImmediate(instance);
-
-        edge.instances.Clear();
-        
-        if (decorator.prefab == null)
-            return;
-        
-        for (int i = 0; i < edge.positions.Count; i++)
-        {
-            var newPrefabInstance = PrefabUtility.InstantiatePrefab(decorator.prefab, decorator.transform) as GameObject;
-            edge.instances.Add(newPrefabInstance);
-        }
-    }
-    
     public static bool RecalculateFace(this BoxBrushDecorator decorator, BoxBrushDecoratorFace face)
     {
         bool instanceCountChanged = false;
         int prevInstanceCount = face.positions.Count;
         
         float faceLength = decorator.dims.y;
-        if (face.orientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH)
+        var effectiveOrientation = face.overrideOrientation ? face.orientation : decorator.faceSettings.orientation;
+
+        if (effectiveOrientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH)
         {
             switch (face.direction)
             {
@@ -299,7 +302,7 @@ public static class BoxBrushDecoratorExtensions
         if (effectiveNumInstances < 1)
             return prevInstanceCount != face.positions.Count;
 
-        var effectiveSpanDirection = face.orientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH
+        var effectiveSpanDirection = effectiveOrientation == BoxBrushFaceDecoratorOrientation.ALONG_WIDTH
             ? face.bitangent
             : face.tangent;
         
@@ -323,7 +326,6 @@ public static class BoxBrushDecoratorExtensions
         return instanceCountChanged;
     }
 
-    
     
     public static void ClearCorners(this BoxBrushDecorator decorator)
     {

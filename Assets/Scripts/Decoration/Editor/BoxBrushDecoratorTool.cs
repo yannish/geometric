@@ -193,7 +193,14 @@ public class BoxBrushDecoratorTool : BaseEditorTool
     void DrawFaceElementData(SerializedProperty prop)
     {
         EditorGUILayout.PropertyField(prop.FindPropertyRelative("isMuted"));
-        EditorGUILayout.PropertyField(prop.FindPropertyRelative("orientation"));
+        // EditorGUILayout.PropertyField(prop.FindPropertyRelative("orientation"));
+        
+        var overrideOrientationProp = prop.FindPropertyRelative("overrideOrientation");
+        EditorGUILayout.PropertyField(overrideOrientationProp);
+        if (overrideOrientationProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(prop.FindPropertyRelative("orientation"));
+        }
         
         var overrideFillProp = prop.FindPropertyRelative("overrideFill");
         EditorGUILayout.PropertyField(overrideFillProp);

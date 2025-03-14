@@ -24,6 +24,8 @@ public class BoxBrushDebug
     public float elementSelectedInflation = 1.2f;
     public float elementPickSize = 2f;
 
+    public float faceElementHandleOffset = 1f;
+    
     public float placeholderPrefabSize = 1f;
     
     public Vector3 drawWireCubeSize = Vector3.one;
@@ -61,6 +63,7 @@ public class BoxDecoratorEdgeSettings
 [Serializable]
 public class BoxDecoratorFaceSettings
 {
+    public BoxBrushFaceDecoratorOrientation orientation;
     [Clamp(0f, Mathf.Infinity)]
     public float padding;
     [Clamp(0f, Mathf.Infinity)]
@@ -96,6 +99,9 @@ public class BoxBrushDecoratorFace
     
     //... CONFIGURED:
     public bool isMuted;
+    
+    public bool overrideOrientation;
+    [ShowIf("overrideOrientation")]
     public BoxBrushFaceDecoratorOrientation orientation;
 
     public bool overrideFill;
