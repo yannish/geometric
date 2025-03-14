@@ -5,7 +5,7 @@ using UnityEngine;
 [CustomEditor(typeof(BoxCollider))]
 public class BoxColliderExtendedEditor : Editor
 {
-    // private Editor _internalEditor;
+    private Editor _internalEditor;
 
     private BoxCollider boxCollider;
 
@@ -19,9 +19,9 @@ public class BoxColliderExtendedEditor : Editor
     {
         boxCollider = target as BoxCollider;
 
-        // Type editorType = Type.GetType("UnityEditor.BoxColliderEditor, UnityEditor");
-        // if(editorType != null)
-        //     _internalEditor = CreateEditor(targets, editorType);
+        Type editorType = Type.GetType("UnityEditor.BoxColliderEditor, UnityEditor");
+        if(editorType != null)
+            _internalEditor = CreateEditor(targets, editorType);
 
         EditorApplication.update -= ChangeCheck;
         EditorApplication.update += ChangeCheck;
@@ -30,8 +30,8 @@ public class BoxColliderExtendedEditor : Editor
     private void OnDisable()
     {
         EditorApplication.update -= ChangeCheck;
-        // if(_internalEditor != null)
-        //     DestroyImmediate(_internalEditor);
+        if(_internalEditor != null)
+            DestroyImmediate(_internalEditor);
     }
 
     void OnDestroy()
@@ -54,30 +54,20 @@ public class BoxColliderExtendedEditor : Editor
         prevSize = boxCollider.size;
     }
 
-    // public override void OnInspectorGUI()
-    // {
-    //     // EditorGUI.BeginChangeCheck();
-    //     // if(_internalEditor != null)
-    //     //     _internalEditor.OnInspectorGUI();
-    //     // if (EditorGUI.EndChangeCheck())
-    //     // {
-    //     //     // Debug.LogWarning("something was tweaked on ExtendedBoxEditor's inspector.");
-    //     // }
-    //
-    //     // if (GUILayout.Button("Snap lower bounds"))
-    //     // {
-    //     //     Debug.LogWarning("Snapping lower bounds.");
-    //     //     var center = boxCollider.center;
-    //     // }
-    //     
-    //     // if (serializedObject.ApplyModifiedProperties())
-    //     // {
-    //         // Debug.LogWarning("something was applied in ExtendedBoxEditor");
-    //     // }
-    //
-    //     // if (prevCenterValue != centerProp.vector3Value)
-    //     // {
-    //     //     Debug.LogWarning("something changed to the value of center!");
-    //     // }
-    // }
+    public override void OnInspectorGUI()
+    {
+        if(_internalEditor != null)
+            _internalEditor.OnInspectorGUI();
+        
+        // EditorGUI.BeginChangeCheck();
+        // if (EditorGUI.EndChangeCheck())
+        // {
+        //     // Debug.LogWarning("something was tweaked on ExtendedBoxEditor's inspector.");
+        // }
+    
+        // if (GUILayout.Button("Snap lower bounds"))
+        // {
+        //     Debug.LogWarning("Snapping lower bounds.");
+        // }
+    }
 }

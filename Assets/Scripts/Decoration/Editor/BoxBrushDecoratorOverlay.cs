@@ -27,13 +27,12 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
     
     public override void OnCreated()
     {
-        Debug.Log("BoxBrushDecoratorOverlay.OnCreated");
+        // Debug.Log("BoxBrushDecoratorOverlay.OnCreated");
     }
 
     public override void OnWillBeDestroyed()
     {
-        Debug.Log("BoxBrushDecoratorOverlay.OnWillBeDestroyed");
-        
+        // Debug.Log("BoxBrushDecoratorOverlay.OnWillBeDestroyed");
         // SceneView.duringSceneGui -= OnSceneGUI;
     }
 
@@ -42,7 +41,6 @@ public class BoxBrushDecoratorOverlay : Overlay, ITransientOverlay
         if (!visible || decorator ==null)
             return;
         
-        // Debug.LogWarning("dwawrring in da scene from overlay");
         Handles.DrawSolidDisc(decorator.transform.position, Vector3.up, 3f);
     }
 
